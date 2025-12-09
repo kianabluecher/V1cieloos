@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -88,9 +88,9 @@ export function SimpleTaskModal({ onSubmit }: SimpleTaskModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90 glow-blue transition-all duration-300">
+        <Button className="bg-cyan-accent hover:bg-cyan-accent/80 text-dark-bg transition-all duration-300">
           <Plus className="h-4 w-4 mr-2" />
-          New Task
+          New Request
         </Button>
       </DialogTrigger>
       <DialogContent 
@@ -99,9 +99,12 @@ export function SimpleTaskModal({ onSubmit }: SimpleTaskModalProps) {
       >
         <DialogHeader className="border-b border-border-subtle pb-4">
           <DialogTitle className="flex items-center gap-3 text-white text-xl">
-            <Layers className="h-6 w-6" />
-            TASK
+            <Layers className="h-6 w-6 text-cyan-accent" />
+            New Design Request
           </DialogTitle>
+          <DialogDescription className="text-text-secondary">
+            Create a new design request for your team
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 pt-6">

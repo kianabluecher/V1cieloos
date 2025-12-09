@@ -20,6 +20,8 @@ import {
   ExternalLink,
   FileDown,
   Link as LinkIcon,
+  Key,
+  Database,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from "../../utils/supabase/client";
@@ -150,9 +152,12 @@ type UploadedDocument = {
 
 export function StrategyPage() {
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+  const [liveDataSettings, setLiveDataSettings] = useState<{url: string; apiKey: string} | null>(null);
+  const [isLoadingLiveData, setIsLoadingLiveData] = useState(true);
 
   useEffect(() => {
     loadUploadedDocuments();
+    loadLiveDataSettings();
   }, []);
 
   const loadUploadedDocuments = async () => {
@@ -163,6 +168,22 @@ export function StrategyPage() {
       }
     } catch (error) {
       console.error("Error loading uploaded documents:", error);
+    }
+  };
+
+  const loadLiveDataSettings = async () => {
+    try {
+      setIsLoadingLiveData(true);
+      // Using hardcoded email for now - in production this would come from context/props
+      const clientEmail = "sarah@client.com";
+      const response = await api.getLiveDataSettings(clientEmail);
+      if (response.success && response.data) {
+        setLiveDataSettings(response.data);
+      }
+    } catch (error) {
+      console.error("Error loading live data settings:", error);
+    } finally {
+      setIsLoadingLiveData(false);
     }
   };
 
@@ -233,6 +254,49 @@ export function StrategyPage() {
           </Badge>
         </div>
       </div>
+
+      {/* Live Data Settings - Show if configured */}
+      {!isLoadingLiveData && liveDataSettings && (
+        <Card className="p-6 glass-card border-purple-500/20 bg-purple-500/5">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Database className="h-5 w-5 text-purple-500" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="text-white">Live Data Connection</h4>
+                <Badge variant="secondary" className="bg-green-500/10 text-green-400 border-green-500/20 text-xs">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </div>
+              <p className="text-text-secondary text-sm mb-4">
+                Your account is connected to live data feeds for real-time analytics
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-4 w-4 text-purple-400" />
+                    <span className="text-xs text-text-secondary">Data URL</span>
+                  </div>
+                  <p className="text-white text-sm font-mono bg-dark-bg/50 px-3 py-2 rounded border border-border-subtle truncate">
+                    {liveDataSettings.url}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Key className="h-4 w-4 text-purple-400" />
+                    <span className="text-xs text-text-secondary">API Key</span>
+                  </div>
+                  <p className="text-white text-sm font-mono bg-dark-bg/50 px-3 py-2 rounded border border-border-subtle">
+                    {liveDataSettings.apiKey.substring(0, 8)}••••••••
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Strategy Content */}
       <div className="space-y-8">

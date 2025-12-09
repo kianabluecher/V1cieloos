@@ -5,8 +5,9 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { User, Mail, Building2, Lock, Save, Camera } from "lucide-react";
+import { User, Mail, Building2, Lock, Save, Camera, Link as LinkIcon, Key } from "lucide-react";
 import { toast } from "sonner@2.0.3";
+import { api } from "../../utils/supabase/client";
 
 type ManageProfilePageProps = {
   user: {
@@ -24,6 +25,7 @@ export function ManageProfilePage({ user, onSave }: ManageProfilePageProps) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+  
   const [formData, setFormData] = useState({
     name: user.name || "",
     email: user.email || "",
@@ -32,9 +34,74 @@ export function ManageProfilePage({ user, onSave }: ManageProfilePageProps) {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
+    liveDataUrl: "",
+    liveDataApiKey: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingLiveData, setIsLoadingLiveData] = useState(true);
+
+  // Load existing live data settings
+  useEffect(() => {
+    if (user.userType === "client") {
+      loadLiveDataSettings();
+    }
+  }, [user.userType, user.email]);
+
+  const loadLiveDataSettings = async () => {
+    try {
+      setIsLoadingLiveData(true);
+      const response = await api.getLiveDataSettings(user.email);
+      if (response.success && response.data) {
+        setFormData(prev => ({
+          ...prev,
+          liveDataUrl: response.data.url || "",
+          liveDataApiKey: response.data.apiKey || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading live data settings:", error);
+    } finally {
+      setIsLoadingLiveData(false);
+    }
+  };
+
+  const handleSaveLiveData = async () => {
+    if (!formData.liveDataUrl && !formData.liveDataApiKey) {
+      toast.error("Please enter both URL and API key");
+      return;
+    }
+
+    if (formData.liveDataUrl && !formData.liveDataApiKey) {
+      toast.error("Please enter an API key");
+      return;
+    }
+
+    if (!formData.liveDataUrl && formData.liveDataApiKey) {
+      toast.error("Please enter a URL");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const response = await api.saveLiveDataSettings({
+        clientEmail: user.email,
+        url: formData.liveDataUrl,
+        apiKey: formData.liveDataApiKey,
+      });
+
+      if (response.success) {
+        toast.success("Live data settings saved successfully");
+      } else {
+        toast.error(response.error || "Failed to save live data settings");
+      }
+    } catch (error) {
+      console.error("Error saving live data settings:", error);
+      toast.error("Failed to save live data settings");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!formData.name || !formData.email) {
@@ -265,6 +332,55 @@ export function ManageProfilePage({ user, onSave }: ManageProfilePageProps) {
           </div>
         </div>
       </Card>
+
+      {/* Live Data Settings */}
+      {user.userType === "client" && (
+        <Card className="p-6 rounded-xl" style={{ backgroundColor: '#1A1A1B', borderColor: '#2A2A2B' }}>
+          <h3 className="text-white mb-2">Live Data Settings</h3>
+          <p className="text-sm text-text-secondary mb-6">
+            Configure your live data feed
+          </p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-white">Data URL</Label>
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+                <Input
+                  value={formData.liveDataUrl}
+                  onChange={(e) => setFormData({ ...formData, liveDataUrl: e.target.value })}
+                  placeholder="Enter data URL"
+                  style={{ backgroundColor: '#1A1A1A', borderColor: '#333333' }}
+                  className="text-white placeholder:text-text-secondary pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white">API Key</Label>
+              <div className="relative">
+                <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+                <Input
+                  value={formData.liveDataApiKey}
+                  onChange={(e) => setFormData({ ...formData, liveDataApiKey: e.target.value })}
+                  placeholder="Enter API key"
+                  style={{ backgroundColor: '#1A1A1A', borderColor: '#333333' }}
+                  className="text-white placeholder:text-text-secondary pl-10"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSaveLiveData}
+              disabled={isSaving}
+              className="bg-cyan-accent hover:bg-cyan-accent/80 text-dark-bg px-8"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? "Saving..." : "Save Live Data Settings"}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Save Button */}
       <div className="flex justify-end">

@@ -31,7 +31,7 @@ app.use(
 let storageAvailable = false;
 (async () => {
   try {
-    const bucketName = 'make-6023d608-files';
+    const bucketName = 'make-c3abf285-files';
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
     
     if (listError) {
@@ -63,16 +63,18 @@ let storageAvailable = false;
 })();
 
 // Health check endpoint
-app.get("/make-server-6023d608/health", (c) => {
+app.get("/make-server-c3abf285/health", (c) => {
   return c.json({ 
     status: "ok",
     storageAvailable: storageAvailable,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    crmRoutesAvailable: true,
+    version: "1.0.1"
   });
 });
 
 // Initialize default data endpoint
-app.post("/make-server-6023d608/init", async (c) => {
+app.post("/make-server-c3abf285/init", async (c) => {
   try {
     // Check if brand info exists, if not create default
     const existingBrand = await kv.get('brand_information');
@@ -331,7 +333,7 @@ app.post("/make-server-6023d608/init", async (c) => {
 });
 
 // Brand Information endpoints
-app.get("/make-server-6023d608/brand", async (c) => {
+app.get("/make-server-c3abf285/brand", async (c) => {
   try {
     let brandInfo = null;
     try {
@@ -368,7 +370,7 @@ app.get("/make-server-6023d608/brand", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/brand", async (c) => {
+app.post("/make-server-c3abf285/brand", async (c) => {
   try {
     const body = await c.req.json();
     await kv.set('brand_information', {
@@ -383,7 +385,7 @@ app.post("/make-server-6023d608/brand", async (c) => {
 });
 
 // File management endpoints
-app.get("/make-server-6023d608/files", async (c) => {
+app.get("/make-server-c3abf285/files", async (c) => {
   try {
     const files = await kv.get('uploaded_files') || [];
     return c.json({ success: true, data: files });
@@ -393,7 +395,7 @@ app.get("/make-server-6023d608/files", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/files/upload", async (c) => {
+app.post("/make-server-c3abf285/files/upload", async (c) => {
   try {
     const formData = await c.req.formData();
     const file = formData.get('file') as File;
@@ -403,7 +405,7 @@ app.post("/make-server-6023d608/files/upload", async (c) => {
     }
 
     const fileName = `${Date.now()}-${file.name}`;
-    const bucketName = 'make-6023d608-files';
+    const bucketName = 'make-c3abf285-files';
     let signedUrl = null;
     let storagePath = null;
 
@@ -459,7 +461,7 @@ app.post("/make-server-6023d608/files/upload", async (c) => {
   }
 });
 
-app.delete("/make-server-6023d608/files/:id", async (c) => {
+app.delete("/make-server-c3abf285/files/:id", async (c) => {
   try {
     const fileId = c.req.param('id');
     const existingFiles = await kv.get('uploaded_files') || [];
@@ -473,7 +475,7 @@ app.delete("/make-server-6023d608/files/:id", async (c) => {
     if (storageAvailable && fileToDelete.storagePath) {
       try {
         const { error: deleteError } = await supabase.storage
-          .from('make-6023d608-files')
+          .from('make-c3abf285-files')
           .remove([fileToDelete.storagePath]);
 
         if (deleteError) {
@@ -496,7 +498,7 @@ app.delete("/make-server-6023d608/files/:id", async (c) => {
 });
 
 // Design requests endpoints
-app.get("/make-server-6023d608/requests", async (c) => {
+app.get("/make-server-c3abf285/requests", async (c) => {
   try {
     const requests = await kv.get('design_requests') || [];
     return c.json({ success: true, data: requests });
@@ -506,7 +508,7 @@ app.get("/make-server-6023d608/requests", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/requests", async (c) => {
+app.post("/make-server-c3abf285/requests", async (c) => {
   try {
     const body = await c.req.json();
     const existingRequests = await kv.get('design_requests') || [];
@@ -532,7 +534,7 @@ app.post("/make-server-6023d608/requests", async (c) => {
   }
 });
 
-app.put("/make-server-6023d608/requests/:id", async (c) => {
+app.put("/make-server-c3abf285/requests/:id", async (c) => {
   try {
     const requestId = c.req.param('id');
     const body = await c.req.json();
@@ -554,7 +556,7 @@ app.put("/make-server-6023d608/requests/:id", async (c) => {
 });
 
 // AI insights endpoints
-app.get("/make-server-6023d608/insights", async (c) => {
+app.get("/make-server-c3abf285/insights", async (c) => {
   try {
     const insights = await kv.get('ai_insights') || [];
     return c.json({ success: true, data: insights });
@@ -564,7 +566,7 @@ app.get("/make-server-6023d608/insights", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/insights", async (c) => {
+app.post("/make-server-c3abf285/insights", async (c) => {
   try {
     const body = await c.req.json();
     await kv.set('ai_insights', {
@@ -579,7 +581,7 @@ app.post("/make-server-6023d608/insights", async (c) => {
 });
 
 // Strategy data endpoints
-app.get("/make-server-6023d608/strategy", async (c) => {
+app.get("/make-server-c3abf285/strategy", async (c) => {
   try {
     const strategy = await kv.get('strategy_data') || {};
     return c.json({ success: true, data: strategy });
@@ -589,7 +591,7 @@ app.get("/make-server-6023d608/strategy", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/strategy", async (c) => {
+app.post("/make-server-c3abf285/strategy", async (c) => {
   try {
     const body = await c.req.json();
     await kv.set('strategy_data', {
@@ -604,7 +606,7 @@ app.post("/make-server-6023d608/strategy", async (c) => {
 });
 
 // Meeting records endpoints
-app.get("/make-server-6023d608/meetings", async (c) => {
+app.get("/make-server-c3abf285/meetings", async (c) => {
   try {
     const meetings = await kv.get('meeting_records') || [];
     return c.json({ success: true, data: meetings });
@@ -614,7 +616,7 @@ app.get("/make-server-6023d608/meetings", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/meetings", async (c) => {
+app.post("/make-server-c3abf285/meetings", async (c) => {
   try {
     const body = await c.req.json();
     const existingMeetings = await kv.get('meeting_records') || [];
@@ -639,52 +641,156 @@ app.post("/make-server-6023d608/meetings", async (c) => {
 });
 
 // Client management endpoints
-app.get("/make-server-6023d608/clients", async (c) => {
+app.get("/make-server-c3abf285/clients", async (c) => {
   try {
-    const clients = await kv.get('clients') || [];
-    return c.json({ success: true, data: clients });
-  } catch (error) {
+    // Try to fetch from Supabase table first
+    let clients = [];
+    let source = 'unknown';
+    
+    try {
+      console.log('Attempting to fetch clients from Supabase table...');
+      const { data: supabaseClients, error } = await supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.log('Supabase query error:', error.message);
+        throw error;
+      }
+      
+      if (supabaseClients) {
+        // Map Supabase column names to app format (snake_case to camelCase)
+        clients = supabaseClients.map((client: any) => ({
+          id: client.id,
+          name: client.name,
+          email: client.email,
+          password: client.password,
+          companyName: client.company_name || client.companyName,
+          status: client.status,
+          projectCount: client.project_count || client.projectCount || 0,
+          lastActivity: client.last_activity || client.lastActivity,
+          createdAt: client.created_at || client.createdAt,
+          updatedAt: client.updated_at || client.updatedAt
+        }));
+        console.log(`✓ Fetched ${clients.length} clients from Supabase table`);
+        source = 'supabase';
+        
+        // Sync to KV store as backup
+        await kv.set('clients', clients);
+      }
+    } catch (supabaseError: any) {
+      // Fall back to KV store if Supabase table doesn't exist
+      console.log('Supabase table not available (this is normal if table not created yet), falling back to KV store');
+      console.log('Error details:', supabaseError?.message || supabaseError);
+      
+      const kvClients = await kv.get('clients');
+      if (kvClients && Array.isArray(kvClients)) {
+        clients = kvClients;
+        source = 'kv_store';
+        console.log(`✓ Fetched ${clients.length} clients from KV store`);
+      } else {
+        console.log('No clients found in KV store either, returning empty array');
+        clients = [];
+        source = 'empty';
+      }
+    }
+    
+    return c.json({ 
+      success: true, 
+      data: clients,
+      source,
+      note: source === 'kv_store' ? 'Using KV store. Create Supabase "clients" table for dual storage.' : undefined
+    });
+  } catch (error: any) {
     console.error('Error fetching clients:', error);
-    return c.json({ success: false, error: 'Failed to fetch clients' }, 500);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch clients',
+      details: error?.message || 'Unknown error'
+    }, 500);
   }
 });
 
-app.post("/make-server-6023d608/clients", async (c) => {
+app.post("/make-server-c3abf285/clients", async (c) => {
   try {
     const body = await c.req.json();
-    const existingClients = await kv.get('clients') || [];
     
-    // Check if email already exists
-    const emailExists = existingClients.some((client: any) => client.email === body.email);
-    if (emailExists) {
-      return c.json({ success: false, error: 'Email already exists' }, 400);
-    }
+    // Generate ID
+    const newClientId = Date.now().toString();
+    const now = new Date().toISOString();
     
     const newClient = {
-      id: Date.now().toString(),
+      id: newClientId,
       name: body.name,
       email: body.email,
       password: body.password, // In production, this should be hashed
       companyName: body.companyName || '',
+      company_name: body.companyName || '', // Snake case for Supabase
       status: 'pending',
       projectCount: 0,
+      project_count: 0, // Snake case for Supabase
       lastActivity: 'Just created',
-      createdAt: new Date().toISOString()
+      last_activity: 'Just created', // Snake case for Supabase
+      createdAt: now,
+      created_at: now, // Snake case for Supabase
+      updatedAt: now,
+      updated_at: now
     };
     
+    // Try to insert into Supabase table
+    let supabaseSuccess = false;
+    try {
+      // Check if email already exists in Supabase
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('email')
+        .eq('email', body.email)
+        .single();
+      
+      if (existingClient) {
+        return c.json({ success: false, error: 'Email already exists' }, 400);
+      }
+      
+      const { data, error } = await supabase
+        .from('clients')
+        .insert([newClient])
+        .select()
+        .single();
+      
+      if (!error && data) {
+        supabaseSuccess = true;
+        console.log('Client created in Supabase table:', data.id);
+      } else {
+        throw new Error(error?.message || 'Insert failed');
+      }
+    } catch (supabaseError) {
+      console.log('Supabase table not available, using KV store only:', supabaseError);
+      
+      // Check email in KV store
+      const existingClients = await kv.get('clients') || [];
+      const emailExists = existingClients.some((client: any) => client.email === body.email);
+      if (emailExists) {
+        return c.json({ success: false, error: 'Email already exists' }, 400);
+      }
+    }
+    
+    // Always save to KV store as backup/fallback
+    const existingClients = await kv.get('clients') || [];
     await kv.set('clients', [...existingClients, newClient]);
     
     // Store client credentials for invitation email
     await kv.set(`client_credentials_${newClient.id}`, {
       email: body.email,
       password: body.password,
-      createdAt: new Date().toISOString()
+      createdAt: now
     });
     
     return c.json({ 
       success: true, 
       data: newClient,
-      message: 'Client created successfully' 
+      message: 'Client created successfully',
+      syncedToSupabase: supabaseSuccess
     });
   } catch (error) {
     console.error('Error creating client:', error);
@@ -692,39 +798,95 @@ app.post("/make-server-6023d608/clients", async (c) => {
   }
 });
 
-app.put("/make-server-6023d608/clients/:id", async (c) => {
+app.put("/make-server-c3abf285/clients/:id", async (c) => {
   try {
     const clientId = c.req.param('id');
     const body = await c.req.json();
-    const existingClients = await kv.get('clients') || [];
+    const now = new Date().toISOString();
     
+    // Prepare update data with both camelCase and snake_case
+    const updateData: any = {
+      ...body,
+      updatedAt: now,
+      updated_at: now
+    };
+    
+    // Map camelCase to snake_case for Supabase compatibility
+    if (body.companyName) {
+      updateData.company_name = body.companyName;
+    }
+    if (body.projectCount !== undefined) {
+      updateData.project_count = body.projectCount;
+    }
+    if (body.lastActivity) {
+      updateData.last_activity = body.lastActivity;
+    }
+    
+    let updatedClient: any = null;
+    let supabaseSuccess = false;
+    
+    // Try to update in Supabase table
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .update(updateData)
+        .eq('id', clientId)
+        .select()
+        .single();
+      
+      if (!error && data) {
+        supabaseSuccess = true;
+        updatedClient = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          companyName: data.company_name || data.companyName,
+          status: data.status,
+          projectCount: data.project_count || data.projectCount || 0,
+          lastActivity: data.last_activity || data.lastActivity,
+          createdAt: data.created_at || data.createdAt,
+          updatedAt: data.updated_at || data.updatedAt
+        };
+        console.log('Client updated in Supabase table:', clientId);
+      } else {
+        throw new Error(error?.message || 'Update failed');
+      }
+    } catch (supabaseError) {
+      console.log('Supabase table not available, using KV store only:', supabaseError);
+    }
+    
+    // Update in KV store
+    const existingClients = await kv.get('clients') || [];
     const clientIndex = existingClients.findIndex((client: any) => client.id === clientId);
-    if (clientIndex === -1) {
+    
+    if (clientIndex === -1 && !updatedClient) {
       return c.json({ success: false, error: 'Client not found' }, 404);
     }
     
-    const updatedClient = {
-      ...existingClients[clientIndex],
-      ...body,
-      updatedAt: new Date().toISOString()
-    };
-    
-    existingClients[clientIndex] = updatedClient;
-    await kv.set('clients', existingClients);
+    if (clientIndex !== -1) {
+      updatedClient = {
+        ...existingClients[clientIndex],
+        ...updateData
+      };
+      existingClients[clientIndex] = updatedClient;
+      await kv.set('clients', existingClients);
+    }
     
     // Update credentials if password was changed
     if (body.password) {
       await kv.set(`client_credentials_${clientId}`, {
         email: updatedClient.email,
         password: body.password,
-        updatedAt: new Date().toISOString()
+        updatedAt: now
       });
     }
     
     return c.json({ 
       success: true, 
       data: updatedClient,
-      message: 'Client updated successfully' 
+      message: 'Client updated successfully',
+      syncedToSupabase: supabaseSuccess
     });
   } catch (error) {
     console.error('Error updating client:', error);
@@ -733,7 +895,7 @@ app.put("/make-server-6023d608/clients/:id", async (c) => {
 });
 
 // Send client invitation via Resend
-app.post("/make-server-6023d608/clients/:id/invite", async (c) => {
+app.post("/make-server-c3abf285/clients/:id/invite", async (c) => {
   try {
     const clientId = c.req.param('id');
     const clients = await kv.get('clients') || [];
@@ -884,7 +1046,7 @@ app.post("/make-server-6023d608/clients/:id/invite", async (c) => {
 });
 
 // Tasks management endpoints
-app.get("/make-server-6023d608/tasks", async (c) => {
+app.get("/make-server-c3abf285/tasks", async (c) => {
   try {
     const tasks = await kv.get('tasks') || [];
     return c.json({ success: true, data: tasks });
@@ -894,7 +1056,7 @@ app.get("/make-server-6023d608/tasks", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/tasks", async (c) => {
+app.post("/make-server-c3abf285/tasks", async (c) => {
   try {
     const body = await c.req.json();
     const existingTasks = await kv.get('tasks') || [];
@@ -924,7 +1086,7 @@ app.post("/make-server-6023d608/tasks", async (c) => {
   }
 });
 
-app.put("/make-server-6023d608/tasks/:id", async (c) => {
+app.put("/make-server-c3abf285/tasks/:id", async (c) => {
   try {
     const taskId = c.req.param('id');
     const body = await c.req.json();
@@ -946,7 +1108,7 @@ app.put("/make-server-6023d608/tasks/:id", async (c) => {
 });
 
 // Team management endpoints
-app.get("/make-server-6023d608/team", async (c) => {
+app.get("/make-server-c3abf285/team", async (c) => {
   try {
     const team = await kv.get('team_members') || [];
     return c.json({ success: true, data: team });
@@ -956,7 +1118,7 @@ app.get("/make-server-6023d608/team", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/team/invite", async (c) => {
+app.post("/make-server-c3abf285/team/invite", async (c) => {
   try {
     const body = await c.req.json();
     const existingTeam = await kv.get('team_members') || [];
@@ -992,7 +1154,7 @@ app.post("/make-server-6023d608/team/invite", async (c) => {
   }
 });
 
-app.delete("/make-server-6023d608/team/:id", async (c) => {
+app.delete("/make-server-c3abf285/team/:id", async (c) => {
   try {
     const memberId = c.req.param('id');
     const existingTeam = await kv.get('team_members') || [];
@@ -1008,7 +1170,7 @@ app.delete("/make-server-6023d608/team/:id", async (c) => {
 });
 
 // Client plans endpoints
-app.get("/make-server-6023d608/plans", async (c) => {
+app.get("/make-server-c3abf285/plans", async (c) => {
   try {
     const plans = await kv.get('client_plans') || [];
     return c.json({ success: true, data: plans });
@@ -1018,7 +1180,7 @@ app.get("/make-server-6023d608/plans", async (c) => {
   }
 });
 
-app.put("/make-server-6023d608/plans/:clientId", async (c) => {
+app.put("/make-server-c3abf285/plans/:clientId", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const body = await c.req.json();
@@ -1040,7 +1202,7 @@ app.put("/make-server-6023d608/plans/:clientId", async (c) => {
 });
 
 // Client assets endpoints
-app.get("/make-server-6023d608/clients/:clientId/assets", async (c) => {
+app.get("/make-server-c3abf285/clients/:clientId/assets", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const assetsKey = `client_assets_${clientId}`;
@@ -1052,7 +1214,7 @@ app.get("/make-server-6023d608/clients/:clientId/assets", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/clients/:clientId/assets", async (c) => {
+app.post("/make-server-c3abf285/clients/:clientId/assets", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const formData = await c.req.formData();
@@ -1063,7 +1225,7 @@ app.post("/make-server-6023d608/clients/:clientId/assets", async (c) => {
     }
 
     const fileName = `${Date.now()}-${file.name}`;
-    const bucketName = 'make-6023d608-files';
+    const bucketName = 'make-c3abf285-files';
     let signedUrl = null;
     let storagePath = null;
 
@@ -1120,7 +1282,7 @@ app.post("/make-server-6023d608/clients/:clientId/assets", async (c) => {
   }
 });
 
-app.delete("/make-server-6023d608/assets/:id", async (c) => {
+app.delete("/make-server-c3abf285/assets/:id", async (c) => {
   try {
     const assetId = c.req.param('id');
     
@@ -1147,7 +1309,7 @@ app.delete("/make-server-6023d608/assets/:id", async (c) => {
     if (storageAvailable && assetToDelete.storagePath) {
       try {
         const { error: deleteError } = await supabase.storage
-          .from('make-6023d608-files')
+          .from('make-c3abf285-files')
           .remove([assetToDelete.storagePath]);
 
         if (deleteError) {
@@ -1172,7 +1334,7 @@ app.delete("/make-server-6023d608/assets/:id", async (c) => {
 });
 
 // Activity Logs
-app.get("/make-server-6023d608/activity", async (c) => {
+app.get("/make-server-c3abf285/activity", async (c) => {
   try {
     const activities = await kv.get('activity_logs') || [];
     return c.json({ success: true, data: activities });
@@ -1182,7 +1344,7 @@ app.get("/make-server-6023d608/activity", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/activity", async (c) => {
+app.post("/make-server-c3abf285/activity", async (c) => {
   try {
     const body = await c.req.json();
     const activities = await kv.get('activity_logs') || [];
@@ -1217,7 +1379,7 @@ app.post("/make-server-6023d608/activity", async (c) => {
 });
 
 // Client Invitations
-app.post("/make-server-6023d608/clients/invite", async (c) => {
+app.post("/make-server-c3abf285/clients/invite", async (c) => {
   try {
     const body = await c.req.json();
     const clients = await kv.get('clients') || [];
@@ -1284,21 +1446,9 @@ app.post("/make-server-6023d608/clients/invite", async (c) => {
   }
 });
 
-// Client Assets
-app.get("/make-server-6023d608/clients/:clientId/assets", async (c) => {
-  try {
-    const clientId = c.req.param('clientId');
-    const allAssets = await kv.get('client_assets') || [];
-    const clientAssets = allAssets.filter((asset: any) => asset.clientId === clientId);
-    
-    return c.json({ success: true, data: clientAssets });
-  } catch (error) {
-    console.error('Error fetching client assets:', error);
-    return c.json({ success: false, error: 'Failed to fetch assets', data: [] }, 500);
-  }
-});
+// NOTE: Duplicate route removed - using the implementation at line 1045-1055 instead
 
-app.post("/make-server-6023d608/clients/:clientId/assets", async (c) => {
+app.post("/make-server-c3abf285/clients/:clientId/assets-legacy", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const formData = await c.req.formData();
@@ -1350,7 +1500,7 @@ app.post("/make-server-6023d608/clients/:clientId/assets", async (c) => {
   }
 });
 
-app.delete("/make-server-6023d608/assets/:assetId", async (c) => {
+app.delete("/make-server-c3abf285/assets/:assetId", async (c) => {
   try {
     const assetId = c.req.param('assetId');
     const allAssets = await kv.get('client_assets') || [];
@@ -1369,7 +1519,7 @@ app.delete("/make-server-6023d608/assets/:assetId", async (c) => {
 });
 
 // Initialize Demo Data
-app.post("/make-server-6023d608/init-demo", async (c) => {
+app.post("/make-server-c3abf285/init-demo", async (c) => {
   try {
     // Initialize activity logs with sample data
     const sampleActivities = [
@@ -1616,7 +1766,7 @@ app.post("/make-server-6023d608/init-demo", async (c) => {
 });
 
 // Client Services
-app.get("/make-server-6023d608/clients/:clientId/services", async (c) => {
+app.get("/make-server-c3abf285/clients/:clientId/services", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const services = await kv.get('client_services') || [];
@@ -1628,7 +1778,7 @@ app.get("/make-server-6023d608/clients/:clientId/services", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/clients/:clientId/services", async (c) => {
+app.post("/make-server-c3abf285/clients/:clientId/services", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const body = await c.req.json();
@@ -1654,7 +1804,7 @@ app.post("/make-server-6023d608/clients/:clientId/services", async (c) => {
 });
 
 // Client Contracts
-app.get("/make-server-6023d608/clients/:clientId/contracts", async (c) => {
+app.get("/make-server-c3abf285/clients/:clientId/contracts", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const contracts = await kv.get('client_contracts') || [];
@@ -1666,7 +1816,7 @@ app.get("/make-server-6023d608/clients/:clientId/contracts", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/clients/:clientId/contracts", async (c) => {
+app.post("/make-server-c3abf285/clients/:clientId/contracts", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const body = await c.req.json();
@@ -1694,7 +1844,7 @@ app.post("/make-server-6023d608/clients/:clientId/contracts", async (c) => {
 });
 
 // Client Comments
-app.get("/make-server-6023d608/clients/:clientId/comments", async (c) => {
+app.get("/make-server-c3abf285/clients/:clientId/comments", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const comments = await kv.get('client_comments') || [];
@@ -1706,7 +1856,7 @@ app.get("/make-server-6023d608/clients/:clientId/comments", async (c) => {
   }
 });
 
-app.post("/make-server-6023d608/clients/:clientId/comments", async (c) => {
+app.post("/make-server-c3abf285/clients/:clientId/comments", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const body = await c.req.json();
@@ -1734,7 +1884,7 @@ app.post("/make-server-6023d608/clients/:clientId/comments", async (c) => {
 });
 
 // Update comment
-app.put("/make-server-6023d608/comments/:commentId", async (c) => {
+app.put("/make-server-c3abf285/comments/:commentId", async (c) => {
   try {
     const commentId = c.req.param('commentId');
     const body = await c.req.json();
@@ -1761,7 +1911,7 @@ app.put("/make-server-6023d608/comments/:commentId", async (c) => {
 });
 
 // Delete comment
-app.delete("/make-server-6023d608/comments/:commentId", async (c) => {
+app.delete("/make-server-c3abf285/comments/:commentId", async (c) => {
   try {
     const commentId = c.req.param('commentId');
     const comments = await kv.get('client_comments') || [];
@@ -1782,7 +1932,7 @@ app.delete("/make-server-6023d608/comments/:commentId", async (c) => {
 });
 
 // Upload comment image
-app.post("/make-server-6023d608/comments/:commentId/images", async (c) => {
+app.post("/make-server-c3abf285/comments/:commentId/images", async (c) => {
   try {
     const commentId = c.req.param('commentId');
     const formData = await c.req.formData();
@@ -1827,7 +1977,7 @@ app.post("/make-server-6023d608/comments/:commentId/images", async (c) => {
 });
 
 // Client Activity
-app.get("/make-server-6023d608/clients/:clientId/activity", async (c) => {
+app.get("/make-server-c3abf285/clients/:clientId/activity", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const activities = await kv.get('activity_logs') || [];
@@ -1846,8 +1996,64 @@ app.get("/make-server-6023d608/clients/:clientId/activity", async (c) => {
   }
 });
 
+// Create Recording
+app.post("/make-server-c3abf285/recordings", async (c) => {
+  try {
+    const body = await c.req.json();
+    const recordings = await kv.get('meetings') || [];
+    
+    const newRecording = {
+      id: `recording-${Date.now()}`,
+      title: body.title,
+      type: body.type || 'audio',
+      date: body.date || new Date().toISOString(),
+      duration: body.duration || '00:00',
+      url: body.url,
+      clientId: body.clientId,
+      createdAt: new Date().toISOString()
+    };
+    
+    recordings.push(newRecording);
+    await kv.set('meetings', recordings);
+    
+    return c.json({ success: true, data: newRecording, message: 'Recording created successfully' });
+  } catch (error) {
+    console.error('Error creating recording:', error);
+    return c.json({ success: false, error: 'Failed to create recording' }, 500);
+  }
+});
+
+// Create Archive Item
+app.post("/make-server-c3abf285/archive", async (c) => {
+  try {
+    const body = await c.req.json();
+    const archiveKey = `archive_${body.clientId}`;
+    const archiveItems = await kv.get(archiveKey) || [];
+    
+    const newItem = {
+      id: `archive-${Date.now()}`,
+      title: body.title,
+      type: body.type || 'document',
+      date: body.date || new Date().toISOString(),
+      description: body.description || '',
+      url: body.url,
+      clientId: body.clientId,
+      tags: body.tags || [],
+      createdAt: new Date().toISOString()
+    };
+    
+    archiveItems.push(newItem);
+    await kv.set(archiveKey, archiveItems);
+    
+    return c.json({ success: true, data: newItem, message: 'Archive item created successfully' });
+  } catch (error) {
+    console.error('Error creating archive item:', error);
+    return c.json({ success: false, error: 'Failed to create archive item' }, 500);
+  }
+});
+
 // Recording Notes
-app.post("/make-server-6023d608/recordings/:recordingId/notes", async (c) => {
+app.post("/make-server-c3abf285/recordings/:recordingId/notes", async (c) => {
   try {
     const recordingId = c.req.param('recordingId');
     const body = await c.req.json();
@@ -1871,7 +2077,7 @@ app.post("/make-server-6023d608/recordings/:recordingId/notes", async (c) => {
   }
 });
 
-app.get("/make-server-6023d608/recordings/:recordingId/notes", async (c) => {
+app.get("/make-server-c3abf285/recordings/:recordingId/notes", async (c) => {
   try {
     const recordingId = c.req.param('recordingId');
     const notes = await kv.get('recording_notes') || [];
@@ -1884,7 +2090,7 @@ app.get("/make-server-6023d608/recordings/:recordingId/notes", async (c) => {
   }
 });
 
-app.delete("/make-server-6023d608/recordings/notes/:noteId", async (c) => {
+app.delete("/make-server-c3abf285/recordings/notes/:noteId", async (c) => {
   try {
     const noteId = c.req.param('noteId');
     const notes = await kv.get('recording_notes') || [];
@@ -1907,7 +2113,7 @@ app.delete("/make-server-6023d608/recordings/notes/:noteId", async (c) => {
 // ==================== QUOTES MANAGEMENT ====================
 
 // Get all quotes
-app.get("/make-server-6023d608/quotes", async (c) => {
+app.get("/make-server-c3abf285/quotes", async (c) => {
   try {
     const quotes = await kv.get('quotes') || [];
     return c.json({ success: true, data: quotes });
@@ -1918,7 +2124,7 @@ app.get("/make-server-6023d608/quotes", async (c) => {
 });
 
 // Create a new quote
-app.post("/make-server-6023d608/quotes", async (c) => {
+app.post("/make-server-c3abf285/quotes", async (c) => {
   try {
     const body = await c.req.json();
     const quotes = await kv.get('quotes') || [];
@@ -1955,7 +2161,7 @@ app.post("/make-server-6023d608/quotes", async (c) => {
 });
 
 // Update a quote
-app.put("/make-server-6023d608/quotes/:id", async (c) => {
+app.put("/make-server-c3abf285/quotes/:id", async (c) => {
   try {
     const quoteId = c.req.param('id');
     const body = await c.req.json();
@@ -1983,7 +2189,7 @@ app.put("/make-server-6023d608/quotes/:id", async (c) => {
 });
 
 // Delete a quote
-app.delete("/make-server-6023d608/quotes/:id", async (c) => {
+app.delete("/make-server-c3abf285/quotes/:id", async (c) => {
   try {
     const quoteId = c.req.param('id');
     const quotes = await kv.get('quotes') || [];
@@ -2003,7 +2209,7 @@ app.delete("/make-server-6023d608/quotes/:id", async (c) => {
 });
 
 // Send quote email
-app.post("/make-server-6023d608/quotes/:id/send", async (c) => {
+app.post("/make-server-c3abf285/quotes/:id/send", async (c) => {
   try {
     const quoteId = c.req.param('id');
     const quotes = await kv.get('quotes') || [];
@@ -2128,7 +2334,7 @@ app.post("/make-server-6023d608/quotes/:id/send", async (c) => {
 // ==================== CUSTOMERS MANAGEMENT ====================
 
 // Get all customers
-app.get("/make-server-6023d608/customers", async (c) => {
+app.get("/make-server-c3abf285/customers", async (c) => {
   try {
     const customers = await kv.get('customers') || [];
     return c.json({ success: true, data: customers });
@@ -2139,7 +2345,7 @@ app.get("/make-server-6023d608/customers", async (c) => {
 });
 
 // Create a new customer
-app.post("/make-server-6023d608/customers", async (c) => {
+app.post("/make-server-c3abf285/customers", async (c) => {
   try {
     const body = await c.req.json();
     const customers = await kv.get('customers') || [];
@@ -2167,7 +2373,7 @@ app.post("/make-server-6023d608/customers", async (c) => {
 // ==================== CATALOG ITEMS MANAGEMENT ====================
 
 // Get all catalog items
-app.get("/make-server-6023d608/catalog", async (c) => {
+app.get("/make-server-c3abf285/catalog", async (c) => {
   try {
     const catalogItems = await kv.get('catalog_items') || [];
     return c.json({ success: true, data: catalogItems });
@@ -2178,7 +2384,7 @@ app.get("/make-server-6023d608/catalog", async (c) => {
 });
 
 // Create a new catalog item
-app.post("/make-server-6023d608/catalog", async (c) => {
+app.post("/make-server-c3abf285/catalog", async (c) => {
   try {
     const body = await c.req.json();
     const catalogItems = await kv.get('catalog_items') || [];
@@ -2207,7 +2413,7 @@ app.post("/make-server-6023d608/catalog", async (c) => {
 // ==================== TEAM TOOLS MANAGEMENT ====================
 
 // Get all team tools
-app.get("/make-server-6023d608/team-tools", async (c) => {
+app.get("/make-server-c3abf285/team-tools", async (c) => {
   try {
     const tools = await kv.get('team_tools') || [];
     return c.json({ success: true, data: tools });
@@ -2218,7 +2424,7 @@ app.get("/make-server-6023d608/team-tools", async (c) => {
 });
 
 // Create a new team tool
-app.post("/make-server-6023d608/team-tools", async (c) => {
+app.post("/make-server-c3abf285/team-tools", async (c) => {
   try {
     const body = await c.req.json();
     const tools = await kv.get('team_tools') || [];
@@ -2246,7 +2452,7 @@ app.post("/make-server-6023d608/team-tools", async (c) => {
 });
 
 // Update a team tool
-app.put("/make-server-6023d608/team-tools/:toolId", async (c) => {
+app.put("/make-server-c3abf285/team-tools/:toolId", async (c) => {
   try {
     const toolId = c.req.param('toolId');
     const body = await c.req.json();
@@ -2278,7 +2484,7 @@ app.put("/make-server-6023d608/team-tools/:toolId", async (c) => {
 });
 
 // Delete a team tool
-app.delete("/make-server-6023d608/team-tools/:toolId", async (c) => {
+app.delete("/make-server-c3abf285/team-tools/:toolId", async (c) => {
   try {
     const toolId = c.req.param('toolId');
     const tools = await kv.get('team_tools') || [];
@@ -2296,7 +2502,7 @@ app.delete("/make-server-6023d608/team-tools/:toolId", async (c) => {
 // ==================== CLIENT FILE MANAGEMENT ====================
 
 // Get file channels for a client
-app.get("/make-server-6023d608/clients/:clientId/file-channels", async (c) => {
+app.get("/make-server-c3abf285/clients/:clientId/file-channels", async (c) => {
   try {
     const clientId = c.req.param('clientId');
     const channels = await kv.get(`file_channels_${clientId}`) || [
@@ -2610,6 +2816,281 @@ app.delete("/make-server-6023d608/kv/:key", async (c) => {
     console.error('Error deleting KV value:', error);
     return c.json({ success: false, error: 'Failed to delete value' }, 500);
   }
+});
+
+// Google Sheets CRM Data Integration
+app.get("/make-server-c3abf285/crm/google-sheets", async (c) => {
+  try {
+    const apiKey = Deno.env.get('GOOGLE_SHEETS_API_KEY');
+    if (!apiKey) {
+      console.error('Google Sheets API key not found in environment variables');
+      return c.json({ 
+        success: false, 
+        error: 'Google Sheets API key not configured. Please set the GOOGLE_SHEETS_API_KEY environment variable.' 
+      }, 500);
+    }
+
+    console.log('Fetching data from Google Sheets...');
+    
+    // Get configuration from environment variables or use defaults
+    // You can set these in Supabase Edge Function secrets
+    const spreadsheetId = Deno.env.get('GOOGLE_SHEETS_SPREADSHEET_ID') || '1G6bNfJs_uA57RU4HOknlWy_KxXvKYvM9i48Ftat90w0';
+    const sheetName = Deno.env.get('GOOGLE_SHEETS_SHEET_NAME') || 'CRM Data'; // Changed from 'Sheet1' to 'CRM Data'
+    
+    console.log(`Spreadsheet ID: ${spreadsheetId}`);
+    console.log(`Sheet Name: ${sheetName}`);
+    
+    // Make the request to Google Sheets API
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
+    
+    console.log('Calling Google Sheets API...');
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: await response.text() };
+      }
+      console.error('Google Sheets API error:', errorData);
+      
+      // Provide helpful error message
+      let userMessage = 'Failed to fetch data from Google Sheets';
+      if (errorData?.error?.code === 400) {
+        userMessage = `Unable to find sheet "${sheetName}" in the spreadsheet. Please check:\n1. The sheet name is correct (set GOOGLE_SHEETS_SHEET_NAME)\n2. The spreadsheet ID is correct (set GOOGLE_SHEETS_SPREADSHEET_ID)\n3. The spreadsheet is publicly accessible or shared with your API key`;
+      } else if (errorData?.error?.code === 403) {
+        userMessage = 'Access denied. Please make sure the Google Sheet is publicly accessible or shared with your service account.';
+      } else if (errorData?.error?.code === 404) {
+        userMessage = 'Spreadsheet not found. Please check the GOOGLE_SHEETS_SPREADSHEET_ID.';
+      }
+      
+      return c.json({ 
+        success: false, 
+        error: userMessage,
+        details: errorData,
+        config: {
+          spreadsheetId,
+          sheetName,
+          hint: 'Set GOOGLE_SHEETS_SPREADSHEET_ID and GOOGLE_SHEETS_SHEET_NAME in Supabase Edge Function secrets'
+        }
+      }, response.status);
+    }
+    
+    const data = await response.json();
+    console.log('Successfully fetched data from Google Sheets');
+    
+    // Transform the data into CRM format
+    // Assuming first row contains headers
+    const rows = data.values || [];
+    if (rows.length === 0) {
+      return c.json({ 
+        success: true, 
+        data: [],
+        headers: [],
+        message: 'No data found in spreadsheet'
+      });
+    }
+    
+    const headers = rows[0];
+    const records = rows.slice(1).map((row: any[], index: number) => {
+      const record: any = { id: `record-${index + 1}` };
+      headers.forEach((header: string, i: number) => {
+        record[header] = row[i] || '';
+      });
+      return record;
+    });
+    
+    console.log(`Transformed ${records.length} records with ${headers.length} columns`);
+    
+    // Cache the data in KV store for offline access
+    await kv.set('crm_google_sheets_data', {
+      records,
+      headers,
+      lastSync: new Date().toISOString(),
+      spreadsheetId
+    });
+    
+    console.log('Successfully cached data');
+    
+    return c.json({ 
+      success: true, 
+      data: records,
+      headers,
+      lastSync: new Date().toISOString()
+    });
+  } catch (error: any) {
+    console.error('Error fetching Google Sheets data:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch Google Sheets data',
+      details: error.message 
+    }, 500);
+  }
+});
+
+// Get cached CRM data
+app.get("/make-server-c3abf285/crm/cached", async (c) => {
+  try {
+    console.log('Fetching cached CRM data...');
+    const cachedData = await kv.get('crm_google_sheets_data');
+    if (!cachedData) {
+      console.log('No cached data found');
+      return c.json({ 
+        success: false, 
+        error: 'No cached data available. Please sync with Google Sheets first.' 
+      }, 404);
+    }
+    
+    console.log('Successfully retrieved cached CRM data');
+    return c.json({ 
+      success: true, 
+      data: cachedData.records,
+      headers: cachedData.headers,
+      lastSync: cachedData.lastSync
+    });
+  } catch (error: any) {
+    console.error('Error fetching cached CRM data:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch cached data',
+      details: error.message 
+    }, 500);
+  }
+});
+
+// Live Data Settings endpoints
+app.get("/make-server-c3abf285/live-data/:clientEmail", async (c) => {
+  try {
+    const clientEmail = c.req.param('clientEmail');
+    console.log(`Fetching live data settings for client: ${clientEmail}`);
+    
+    const settingsKey = `live_data_${clientEmail}`;
+    const settings = await kv.get(settingsKey);
+    
+    if (!settings) {
+      return c.json({ 
+        success: true, 
+        data: null,
+        message: 'No live data settings found for this client'
+      });
+    }
+    
+    return c.json({ 
+      success: true, 
+      data: settings
+    });
+  } catch (error: any) {
+    console.error('Error fetching live data settings:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch live data settings',
+      details: error.message 
+    }, 500);
+  }
+});
+
+app.post("/make-server-c3abf285/live-data", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { clientEmail, url, apiKey } = body;
+    
+    if (!clientEmail || !url || !apiKey) {
+      return c.json({ 
+        success: false, 
+        error: 'Missing required fields: clientEmail, url, and apiKey are required'
+      }, 400);
+    }
+    
+    console.log(`Saving live data settings for client: ${clientEmail}`);
+    
+    // Store in KV store with key pattern: live_data_{clientEmail}
+    const settingsKey = `live_data_${clientEmail}`;
+    const settings = {
+      clientEmail,
+      url,
+      apiKey,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await kv.set(settingsKey, settings);
+    
+    // Also try to save to Supabase clients table if it exists
+    try {
+      const { data: existingClients } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('email', clientEmail)
+        .limit(1);
+      
+      if (existingClients && existingClients.length > 0) {
+        const clientId = existingClients[0].id;
+        
+        // Update the client with live data settings
+        await supabase
+          .from('clients')
+          .update({
+            live_data_url: url,
+            live_data_api_key: apiKey,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', clientId);
+        
+        console.log(`Updated Supabase client table for ${clientEmail}`);
+      }
+    } catch (supabaseError) {
+      console.log('Supabase client table not available or update failed:', supabaseError);
+      // Continue anyway, KV store is the primary storage
+    }
+    
+    console.log(`Successfully saved live data settings for ${clientEmail}`);
+    
+    return c.json({ 
+      success: true, 
+      message: 'Live data settings saved successfully',
+      data: {
+        clientEmail,
+        url,
+        updatedAt: settings.updatedAt
+      }
+    });
+  } catch (error: any) {
+    console.error('Error saving live data settings:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to save live data settings',
+      details: error.message 
+    }, 500);
+  }
+});
+
+// Debug route to list all available routes
+app.get("/make-server-c3abf285/routes", (c) => {
+  return c.json({
+    success: true,
+    routes: [
+      "/make-server-c3abf285/health",
+      "/make-server-c3abf285/crm/google-sheets",
+      "/make-server-c3abf285/crm/cached",
+      "/make-server-c3abf285/brand",
+      "/make-server-c3abf285/analytics/twipla",
+      "/make-server-c3abf285/live-data/:clientEmail (GET)",
+      "/make-server-c3abf285/live-data (POST)",
+      "and more..."
+    ],
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Catch-all 404 handler
+app.notFound((c) => {
+  return c.json({
+    success: false,
+    error: "Route not found",
+    path: c.req.path,
+    method: c.req.method,
+    hint: "Check /make-server-c3abf285/routes for available endpoints"
+  }, 404);
 });
 
 Deno.serve(app.fetch);

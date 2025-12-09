@@ -936,6 +936,9 @@ export function NewRequestModal({ onSubmit }: NewRequestModalProps) {
             <Plus className="h-5 w-5" />
             Create New Request
           </DialogTitle>
+          <DialogDescription className="text-text-secondary">
+            Select an agent and define your request details to get started
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">

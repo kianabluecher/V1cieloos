@@ -10,7 +10,7 @@ const supabase = createClient(
 export default supabase;
 
 // API helper functions
-const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-6023d608`;
+const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-c3abf285`;
 
 export const api = {
   // Health check
@@ -201,13 +201,6 @@ export const api = {
     return response.json();
   },
 
-  // Meeting Records
-  getMeetings: async () => {
-    const response = await fetch(`${BASE_URL}/meetings`, {
-      headers: { 'Authorization': `Bearer ${publicAnonKey}` }
-    });
-    return response.json();
-  },
 
   saveMeeting: async (data: any) => {
     const response = await fetch(`${BASE_URL}/meetings`, {
@@ -474,6 +467,52 @@ export const api = {
     } catch (error) {
       console.error('Error fetching meetings:', error);
       return { success: false, error: error.message, data: [] };
+    }
+  },
+
+  getRecordings: async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/meetings`, {
+        headers: { 'Authorization': `Bearer ${publicAnonKey}` }
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching recordings:', error);
+      return { success: false, error: error.message, data: [] };
+    }
+  },
+
+  createRecording: async (data: any) => {
+    try {
+      const response = await fetch(`${BASE_URL}/recordings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Error creating recording:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  createArchiveItem: async (data: any) => {
+    try {
+      const response = await fetch(`${BASE_URL}/archive`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Error creating archive item:', error);
+      return { success: false, error: error.message };
     }
   },
 
@@ -1101,6 +1140,61 @@ export const api = {
       return response.json();
     } catch (error) {
       console.error('Error updating client portal settings:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // CRM - Google Sheets Integration
+  syncCRMData: async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/crm/google-sheets`, {
+        headers: { 'Authorization': `Bearer ${publicAnonKey}` }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error syncing CRM data:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  getCachedCRMData: async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/crm/cached`, {
+        headers: { 'Authorization': `Bearer ${publicAnonKey}` }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching cached CRM data:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Live Data Settings
+  getLiveDataSettings: async (clientEmail: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/live-data/${encodeURIComponent(clientEmail)}`, {
+        headers: { 'Authorization': `Bearer ${publicAnonKey}` }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching live data settings:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  saveLiveDataSettings: async (data: { clientEmail: string; url: string; apiKey: string }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/live-data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify(data)
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error saving live data settings:', error);
       return { success: false, error: error.message };
     }
   }

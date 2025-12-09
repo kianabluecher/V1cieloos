@@ -183,13 +183,13 @@ export function DesignRequestsPage() {
           dueDate: response.data.deadline ? new Date(response.data.deadline) : undefined
         };
         setTasks(prev => [newTask, ...prev]);
-        toast.success('Task created successfully');
+        toast.success('Request created successfully');
       } else {
-        toast.error('Failed to create task');
+        toast.error('Failed to create request');
       }
     } catch (error) {
-      console.error('Error creating task:', error);
-      toast.error('Failed to create task');
+      console.error('Error creating request:', error);
+      toast.error('Failed to create request');
     }
   };
 
@@ -275,18 +275,18 @@ export function DesignRequestsPage() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-4">
           {icon}
-          <h3 className="text-sm">{title}</h3>
-          <Badge variant="secondary" className="text-xs">
+          <h3 className="text-sm text-white">{title}</h3>
+          <Badge variant="secondary" className="text-xs bg-cyan-accent/10 text-cyan-accent border-cyan-accent/20">
             {count}
           </Badge>
-          <Button variant="ghost" size="sm" className="ml-auto">
+          <Button variant="ghost" size="sm" className="ml-auto text-cyan-accent hover:text-cyan-accent/80 hover:bg-cyan-accent/10">
             <Plus className="h-3 w-3" />
           </Button>
         </div>
 
         <div className="space-y-3">
           {status === 'queued' && isEmpty && (
-            <Card className="p-4 border-2 border-dashed border-border/50 hover:border-primary/50 transition-colors cursor-pointer">
+            <Card className="p-4 border-2 border-dashed border-cyan-accent/30 hover:border-cyan-accent/50 transition-colors cursor-pointer bg-transparent">
               <div className="flex items-center justify-center">
                 <SimpleTaskModal onSubmit={handleNewTask} />
               </div>
@@ -295,11 +295,11 @@ export function DesignRequestsPage() {
 
           {isEmpty && status !== 'queued' && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-3">
-                <Layers className="h-6 w-6 text-muted-foreground" />
+              <div className="w-12 h-12 bg-card-bg rounded-lg flex items-center justify-center mb-3">
+                <Layers className="h-6 w-6 text-text-secondary" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                No tasks {status === 'running' ? 'running' : status === 'waiting' ? 'waiting' : 'completed'}
+              <p className="text-sm text-text-secondary">
+                No tasks {status === 'running' ? 'running' : status === 'waiting' ? 'for review' : 'completed'}
               </p>
             </div>
           )}
@@ -307,10 +307,10 @@ export function DesignRequestsPage() {
           {columnTasks.map((task) => (
             <Card 
               key={task.id} 
-              className={`p-3 transition-colors group ${
+              className={`p-3 transition-all duration-200 group border-border-subtle bg-card-bg ${
                 task.status === 'running' || task.status === 'waiting' || task.status === 'completed'
-                  ? 'hover:bg-accent/5 cursor-pointer hover:card-glow'
-                  : 'hover:bg-accent/5'
+                  ? 'hover:bg-cyan-accent/5 cursor-pointer hover:border-cyan-accent/30'
+                  : 'hover:bg-card-bg/80'
               }`}
               onClick={() => handleTaskClick(task)}
             >
@@ -320,15 +320,15 @@ export function DesignRequestsPage() {
                     task.status === 'completed' 
                       ? 'bg-[#20C997]' 
                       : task.status === 'running'
-                      ? 'bg-primary'
+                      ? 'bg-cyan-accent'
                       : task.status === 'waiting'
                       ? 'bg-orange-500'
-                      : 'bg-muted-foreground'
+                      : 'bg-text-secondary'
                   }`}>
                     {task.status === 'completed' ? (
                       <CheckCircle className="h-2.5 w-2.5 text-white" />
                     ) : task.status === 'running' ? (
-                      <Play className="h-2.5 w-2.5 text-white" />
+                      <Play className="h-2.5 w-2.5 text-dark-bg" />
                     ) : task.status === 'waiting' ? (
                       <AlertCircle className="h-2.5 w-2.5 text-white" />
                     ) : (
@@ -337,36 +337,36 @@ export function DesignRequestsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-muted-foreground">TASK-{task.id}</span>
+                      <span className="text-xs text-text-secondary">TASK-{task.id}</span>
                       <div className={`w-2 h-2 rounded-full ${
                         task.status === 'completed' ? 'bg-[#20C997]' :
-                        task.status === 'running' ? 'bg-primary' :
+                        task.status === 'running' ? 'bg-cyan-accent' :
                         task.status === 'waiting' ? 'bg-orange-500' :
-                        'bg-muted-foreground'
+                        'bg-text-secondary'
                       }`} />
                     </div>
-                    <h4 className="text-sm leading-tight group-hover:text-primary transition-colors">
+                    <h4 className="text-sm leading-tight group-hover:text-cyan-accent transition-colors text-white">
                       {task.title}
                     </h4>
                   </div>
                 </div>
 
                 {task.type && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground ml-6">
+                  <div className="flex items-center gap-1 text-xs text-text-secondary ml-6">
                     {getTypeIcon(task.type)}
                     <span className="capitalize">{task.type.replace('-', ' ')}</span>
                   </div>
                 )}
 
                 {task.dueDate && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground ml-6">
+                  <div className="flex items-center gap-1 text-xs text-text-secondary ml-6">
                     <Calendar className="h-3 w-3" />
                     <span>{task.dueDate.toLocaleDateString()}</span>
                   </div>
                 )}
 
                 {task.status === 'completed' && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground ml-6">
+                  <div className="flex items-center gap-1 text-xs text-text-secondary ml-6">
                     <span>24/24 steps</span>
                     <Clock className="h-3 w-3" />
                     <span>43m</span>
@@ -376,12 +376,12 @@ export function DesignRequestsPage() {
                 {task.status === 'waiting' && (
                   <div className="flex items-center gap-1 text-xs text-orange-500 ml-6">
                     <AlertCircle className="h-3 w-3" />
-                    <span>Waiting for approval</span>
+                    <span>Ready for review</span>
                   </div>
                 )}
 
                 {task.humanInLoop && (
-                  <div className="flex items-center gap-1 text-xs text-primary ml-6">
+                  <div className="flex items-center gap-1 text-xs text-cyan-accent ml-6">
                     <User className="h-3 w-3" />
                     <span>Expert in loop</span>
                   </div>
@@ -389,7 +389,7 @@ export function DesignRequestsPage() {
 
                 <div className="flex items-center justify-between ml-6 mt-2">
                   {(task.status === 'running' || task.status === 'waiting' || task.status === 'completed') && (
-                    <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="text-xs text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
                       Click to view details and chat
                     </div>
                   )}
@@ -400,12 +400,12 @@ export function DesignRequestsPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                           }}
-                          className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/10 transition-all ml-auto"
+                          className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-dashed border-cyan-accent/50 hover:border-cyan-accent hover:bg-cyan-accent/10 transition-all ml-auto"
                         >
                           <div className="flex gap-0.5">
-                            <span className="w-1 h-1 rounded-full bg-primary"></span>
-                            <span className="w-1 h-1 rounded-full bg-primary"></span>
-                            <span className="w-1 h-1 rounded-full bg-primary"></span>
+                            <span className="w-1 h-1 rounded-full bg-cyan-accent"></span>
+                            <span className="w-1 h-1 rounded-full bg-cyan-accent"></span>
+                            <span className="w-1 h-1 rounded-full bg-cyan-accent"></span>
                           </div>
                         </button>
                       </TooltipTrigger>
@@ -438,27 +438,26 @@ export function DesignRequestsPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-[rgb(255,255,255)]">Tasks</h3>
-            <Badge variant="secondary" className="bg-primary/10 text-primary">
+            <h3 className="text-white">Design Requests</h3>
+            <Badge variant="secondary" className="bg-cyan-accent/10 text-cyan-accent border-cyan-accent/20">
               Beta
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">Track and manage your tasks across different stages of completion.</p>
+          <p className="text-sm text-text-secondary mt-1">Track and manage your design requests across different stages of completion.</p>
         </div>
         <SimpleTaskModal onSubmit={handleNewTask} />
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex items-center gap-4">
+      {/* Search and Filters */}\n      <div className="flex items-center gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search tasks..." className="pl-9" />
+          <Search className="absolute left-3 top-3 h-4 w-4 text-text-secondary" />
+          <Input placeholder="Search requests..." className="pl-9 bg-card-bg border-border-subtle text-white" />
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="border-border-subtle text-white hover:bg-cyan-accent/10 hover:text-cyan-accent">
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
-        <Button variant="outline">
+        <Button variant="outline" className="border-border-subtle text-white hover:bg-cyan-accent/10 hover:text-cyan-accent">
           <ArrowUpDown className="h-4 w-4 mr-2" />
           Sort
         </Button>
@@ -467,9 +466,9 @@ export function DesignRequestsPage() {
       {/* Kanban Board */}
       <div className="flex-1 overflow-hidden">
         <div className="flex gap-6 h-full">
-          {renderColumn('queued', 'Queued', <Clock className="h-4 w-4 text-muted-foreground" />, statusCounts.queued)}
-          {renderColumn('running', 'Running', <Play className="h-4 w-4 text-blue-500" />, statusCounts.running)}
-          {renderColumn('waiting', 'Waiting on You', <AlertCircle className="h-4 w-4 text-orange-500" />, statusCounts.waiting)}
+          {renderColumn('queued', 'Queued', <Clock className="h-4 w-4 text-text-secondary" />, statusCounts.queued)}
+          {renderColumn('running', 'In Progress', <Play className="h-4 w-4 text-cyan-accent" />, statusCounts.running)}
+          {renderColumn('waiting', 'Ready for Review', <AlertCircle className="h-4 w-4 text-orange-500" />, statusCounts.waiting)}
           {renderColumn('completed', 'Completed', <CheckCircle className="h-4 w-4 text-[#20C997]" />, statusCounts.completed)}
         </div>
       </div>

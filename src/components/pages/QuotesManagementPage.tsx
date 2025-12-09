@@ -1009,7 +1009,12 @@ export function QuotesManagementPage() {
           <div className="flex flex-col h-full">
             {/* Preview Header with Actions */}
             <div className="flex items-center justify-between p-4 border-b border-border-subtle">
-              <DialogTitle className="text-white">Quote Preview</DialogTitle>
+              <div className="flex flex-col">
+                <DialogTitle className="text-white">Quote Preview</DialogTitle>
+                <DialogDescription className="text-text-secondary text-sm">
+                  Preview how the quote will look to the customer
+                </DialogDescription>
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

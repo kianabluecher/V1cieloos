@@ -48,10 +48,12 @@ import {
   Share2,
   Globe,
   ExternalLink,
+  Phone,
 } from "lucide-react";
 import { api } from "../utils/supabase/client";
 import { toast } from "sonner@2.0.3";
 import { AttachmentPreviewDialog } from "./AttachmentPreviewDialog";
+import { LogCallModal } from "./LogCallModal";
 
 type Client = {
   id: string;
@@ -174,6 +176,7 @@ export function ClientDetailView({ client, onBack, viewMode }: ClientDetailViewP
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentContent, setEditingCommentContent] = useState("");
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
+  const [isLogCallModalOpen, setIsLogCallModalOpen] = useState(false);
   const [replyContent, setReplyContent] = useState("");
 
   const [editForm, setEditForm] = useState({
@@ -271,7 +274,7 @@ export function ClientDetailView({ client, onBack, viewMode }: ClientDetailViewP
       }
 
       // Load comments
-      const commentsResponse = await api.getComments(client.id);
+      const commentsResponse = await api.getClientComments(client.id);
       if (commentsResponse.success) {
         setComments(commentsResponse.data || []);
       }
@@ -874,9 +877,21 @@ export function ClientDetailView({ client, onBack, viewMode }: ClientDetailViewP
             <div className="space-y-4">
               {/* Recordings */}
               <Card className="border-border-subtle p-4" style={{ backgroundColor: '#1A1A1A' }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Video className="h-4 w-4 text-cyan-accent" />
-                  <h3 className="text-white">Recordings</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-cyan-accent" />
+                    <h3 className="text-white">Recordings</h3>
+                  </div>
+                  {canEdit && (
+                    <Button
+                      onClick={() => setIsLogCallModalOpen(true)}
+                      size="sm"
+                      className="bg-cyan-accent hover:bg-cyan-accent/80 text-dark-bg"
+                    >
+                      <Phone className="h-3 w-3 mr-1" />
+                      Log Call
+                    </Button>
+                  )}
                 </div>
                 <Separator className="mb-3 bg-border-subtle" />
                 
@@ -1396,6 +1411,14 @@ export function ClientDetailView({ client, onBack, viewMode }: ClientDetailViewP
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         attachment={previewAsset}
+      />
+
+      {/* Log Call Modal */}
+      <LogCallModal
+        open={isLogCallModalOpen}
+        onClose={() => setIsLogCallModalOpen(false)}
+        clientId={client.id}
+        onSuccess={loadClientData}
       />
     </div>
   );

@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
-import { Card } from "./components/ui/card";
+import { toast } from "sonner@2.0.3";
+import { Toaster } from "./components/ui/sonner";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
+import { Card } from "./components/ui/card";
 import { Separator } from "./components/ui/separator";
-import { Toaster } from "./components/ui/sonner";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "./components/ui/breadcrumb";
 import {
   Bot,
   Target,
@@ -22,7 +15,6 @@ import {
   Upload,
   RefreshCw,
   Download,
-
   Plus,
   TrendingUp,
   Sparkles,
@@ -42,56 +34,58 @@ import {
   Activity,
   Grid3x3,
   List,
+  BarChart3,
+  Building2,
 } from "lucide-react";
-
-import { FileUpload } from "./components/FileUpload";
-import { BrandInformation } from "./components/BrandInformation";
-import { StrategySection } from "./components/StrategySection";
-import { StrategyPage } from "./components/pages/StrategyPage";
-import { DesignRequestsPage } from "./components/pages/DesignRequestsPage";
+import cieloLogo from "./assets/cielo-logo-new.svg";
+import { LoginPage } from "./components/LoginPage";
+import { ProfileDropdown } from "./components/ProfileDropdown";
+import { ManageProfilePage } from "./components/pages/ManageProfilePage";
+import { SettingsPage } from "./components/pages/SettingsPage";
 import { ServicePage } from "./components/pages/ServicePage";
-import { DataArchivePage } from "./components/pages/DataArchivePage";
 import { AgencyDashboardPage } from "./components/pages/AgencyDashboardPage";
-import { ManagementPage } from "./components/pages/ManagementPage";
+import { DesignRequestsPage } from "./components/pages/DesignRequestsPage";
 import { TaskManagementPage } from "./components/pages/TaskManagementPage";
+import { FilesPage } from "./components/pages/FilesPage";
 import { ToolsPage } from "./components/pages/ToolsPage";
 import { NotificationsPage } from "./components/pages/NotificationsPage";
 import { NewRequestModal } from "./components/NewRequestModal";
-import { ProfileDropdown } from "./components/ProfileDropdown";
-import { LoginPage } from "./components/LoginPage";
-import { ManageProfilePage } from "./components/pages/ManageProfilePage";
-import { SettingsPage } from "./components/pages/SettingsPage";
+import { StrategyPage } from "./components/pages/StrategyPage";
+import { DataArchivePage } from "./components/pages/DataArchivePage";
+import { StrategySection } from "./components/StrategySection";
+import { BrandInformation } from "./components/BrandInformation";
+import { FileUpload } from "./components/FileUpload";
+import { ClientManagementPage } from "./components/pages/ClientManagementPage";
+import { ManagementPage } from "./components/pages/ManagementPage";
 import { BillingPage } from "./components/pages/BillingPage";
 import { ActivityLogPage } from "./components/pages/ActivityLogPage";
-import { ClientManagementPage } from "./components/pages/ClientManagementPage";
-import { FilesPage } from "./components/pages/FilesPage";
 import { TeamToolsManagementPage } from "./components/pages/TeamToolsManagementPage";
+import { AttachmentPreviewDialog } from "./components/AttachmentPreviewDialog";
+import { AnalyticsPage } from "./components/pages/AnalyticsPage";
+import { CRMPage } from "./components/pages/CRMPage";
+import { AutomationsPage } from "./components/pages/AutomationsPage";
 import { SocialMediaPage } from "./components/pages/SocialMediaPage";
 import { BrandWebPage } from "./components/pages/BrandWebPage";
-import { AttachmentPreviewDialog } from "./components/AttachmentPreviewDialog";
-import { AutomationsPage } from "./components/pages/AutomationsPage";
 import { LeadGenPage } from "./components/pages/LeadGenPage";
-import { OutboundPage } from "./components/pages/OutboundPage";
 import { AdsPage } from "./components/pages/AdsPage";
 import { api } from "./utils/supabase/client";
-import { toast } from "sonner@2.0.3";
-import cieloLogo from "figma:asset/d03cd21ee79b9e9d0f4d82e4c9ae9561321b8d42.png";
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [activeNav, setActiveNav] = useState("hub");
   const [activePage, setActivePage] = useState<"main" | "profile" | "settings" | "service">("main");
   const [viewMode, setViewMode] = useState<"client" | "team" | "management">("client");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [billingSubmenu, setBillingSubmenu] = useState<"invoices" | "quotes" | "addons" | "packages" | null>(null);
+  const [companySubmenu, setCompanySubmenu] = useState<"analytics" | "crm" | null>(null);
   const [strategySubmenu, setStrategySubmenu] = useState<"overview" | "social" | "brandweb" | "leadgen" | "ads" | null>(null);
   const [archiveDetailItem, setArchiveDetailItem] = useState<any>(null);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(["clients", "billing"]);
   const [currentUser, setCurrentUser] = useState({
-    name: "",
-    email: "",
-    companyName: "",
-    role: "",
+    name: "Sarah Johnson",
+    email: "sarah@client.com",
+    companyName: "ACME Corporation",
+    role: "Marketing Director",
     userType: "client" as "client" | "team" | "management",
   });
 
@@ -100,7 +94,89 @@ export default function App() {
   useEffect(() => {
     seedInitialData();
     checkSavedSession();
+    handleInitialRoute();
   }, []);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      handleInitialRoute();
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update URL when navigation changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      updateURL();
+    }
+  }, [activeNav, activePage, viewMode, billingSubmenu, companySubmenu, strategySubmenu, isAuthenticated]);
+
+  const handleInitialRoute = () => {
+    const path = window.location.pathname;
+    const segments = path.split('/').filter(Boolean);
+    
+    if (segments.length === 0) return;
+    
+    const [viewType, page, subpage] = segments;
+    
+    // Map URL view type to viewMode
+    let newViewMode: "client" | "team" | "management" = "client";
+    if (viewType === "admin" || viewType === "management") {
+      newViewMode = "management";
+    } else if (viewType === "team") {
+      newViewMode = "team";
+    } else if (viewType === "client") {
+      newViewMode = "client";
+    }
+    
+    setViewMode(newViewMode);
+    
+    // Handle page navigation
+    if (page) {
+      if (page === "profile" || page === "settings" || page === "service") {
+        setActivePage(page as any);
+      } else {
+        setActivePage("main");
+        setActiveNav(page);
+        
+        // Handle submenus
+        if (subpage) {
+          if (page === "billing") {
+            setBillingSubmenu(subpage as any);
+          } else if (page === "company") {
+            setCompanySubmenu(subpage as any);
+          } else if (page === "strategy") {
+            setStrategySubmenu(subpage as any);
+          }
+        }
+      }
+    }
+  };
+
+  const updateURL = () => {
+    const viewPrefix = viewMode === "management" ? "admin" : viewMode;
+    let url = `/${viewPrefix}`;
+    
+    if (activePage === "profile" || activePage === "settings" || activePage === "service") {
+      url += `/${activePage}`;
+    } else {
+      url += `/${activeNav}`;
+      
+      // Add submenu to URL if applicable
+      if (activeNav === "billing" && billingSubmenu) {
+        url += `/${billingSubmenu}`;
+      } else if (activeNav === "company" && companySubmenu) {
+        url += `/${companySubmenu}`;
+      } else if (activeNav === "strategy" && strategySubmenu) {
+        url += `/${strategySubmenu}`;
+      }
+    }
+    
+    window.history.pushState({}, '', url);
+  };
 
   const checkSavedSession = () => {
     try {
@@ -152,6 +228,16 @@ export default function App() {
       label: "Dashboard", 
       icon: LayoutDashboard,
       isExpandable: false
+    },
+    { 
+      id: "company", 
+      label: "Company", 
+      icon: Building2,
+      isExpandable: true,
+      subItems: [
+        { id: "company-analytics", label: "Analytics", icon: BarChart3 },
+        { id: "company-crm", label: "CRM", icon: Users },
+      ]
     },
     { 
       id: "clients", 
@@ -348,6 +434,10 @@ export default function App() {
       switch (activeNav) {
         case "clients":
           return "Client Management & Invitations";
+        case "company":
+          if (companySubmenu === "analytics") return "Company - Web Analytics & Insights";
+          if (companySubmenu === "crm") return "Company - Customer Relationship Management";
+          return "Company Information & Tools";
         case "team":
           return "Team Members & Permissions";
         case "team-tools":
@@ -362,6 +452,8 @@ export default function App() {
           return "Client Billing & Subscriptions";
         case "activity":
           return "Login & Activity Tracking";
+        case "analytics":
+          return "Website Performance & Traffic Insights";
         default:
           return "Management Dashboard";
       }
@@ -463,6 +555,10 @@ export default function App() {
     // Management view
     if (viewMode === "management") {
       switch (activeNav) {
+        case "company":
+          if (companySubmenu === "analytics") return <AnalyticsPage />;
+          if (companySubmenu === "crm") return <CRMPage />;
+          return <AnalyticsPage />; // Default to analytics
         case "clients":
           return <ClientManagementPage />;
         case "team":
@@ -477,6 +573,8 @@ export default function App() {
           return <FilesPage />;
         case "activity":
           return <ActivityLogPage />;
+        case "analytics":
+          return <AnalyticsPage />;
         case "notifications":
           return <NotificationsPage />;
         default:
@@ -944,6 +1042,7 @@ export default function App() {
                       const isSubActive = 
                         activeNav === item.id && 
                         ((item.id === "billing" && billingSubmenu === subItem.id.replace("billing-", "")) ||
+                         (item.id === "company" && companySubmenu === subItem.id.replace("company-", "")) ||
                          (item.id === "clients" && activeNav === "clients"));
                       
                       return (
@@ -954,6 +1053,9 @@ export default function App() {
                             setActivePage("main");
                             if (item.id === "billing") {
                               setBillingSubmenu(subItem.id.replace("billing-", "") as any);
+                            }
+                            if (item.id === "company") {
+                              setCompanySubmenu(subItem.id.replace("company-", "") as any);
                             }
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
@@ -1022,52 +1124,6 @@ export default function App() {
                       }`}
                     >
                       Ads Management
-                    </button>
-                  </div>
-                )}
-                
-                {/* Billing Submenu - Management Only */}
-                {hasBillingSubmenu && isActive && !isSidebarCollapsed && (
-                  <div className="ml-8 mt-1 space-y-1">
-                    <button
-                      onClick={() => setBillingSubmenu("invoices")}
-                      className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
-                        billingSubmenu === "invoices"
-                          ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
-                      }`}
-                    >
-                      Invoices
-                    </button>
-                    <button
-                      onClick={() => setBillingSubmenu("quotes")}
-                      className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
-                        billingSubmenu === "quotes"
-                          ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
-                      }`}
-                    >
-                      Quotes
-                    </button>
-                    <button
-                      onClick={() => setBillingSubmenu("addons")}
-                      className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
-                        billingSubmenu === "addons"
-                          ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
-                      }`}
-                    >
-                      Add Ons
-                    </button>
-                    <button
-                      onClick={() => setBillingSubmenu("packages")}
-                      className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
-                        billingSubmenu === "packages"
-                          ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
-                      }`}
-                    >
-                      Packages
                     </button>
                   </div>
                 )}
