@@ -29,15 +29,21 @@ export function FileUpload() {
 
   const loadFiles = async () => {
     try {
+      console.log('[FileUpload] Loading files...');
       const response = await api.getFiles();
+      console.log('[FileUpload] Response:', response);
+      
       if (response.success) {
         setFiles(response.data);
+        console.log('[FileUpload] Files loaded:', response.data.length);
       } else {
-        console.error('Failed to load files:', response.error);
+        console.error('[FileUpload] Failed to load files:', response.error);
+        console.error('[FileUpload] Error details:', response.details);
+        toast.error(`Failed to load files: ${response.details || response.error}`);
       }
     } catch (error) {
-      console.error('Error loading files:', error);
-      toast.error('Failed to load files');
+      console.error('[FileUpload] Error loading files:', error);
+      toast.error(`Failed to load files: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }

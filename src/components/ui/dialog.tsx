@@ -52,7 +52,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     data-slot="dialog-overlay"
     className={cn(
-      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80 backdrop-blur-sm",
       className,
     )}
     {...props}
@@ -70,14 +70,14 @@ const DialogContent = React.forwardRef<
       ref={ref}
       data-slot="dialog-content"
       className={cn(
-        "bg-[#1A1A1B] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-[#2A2A2B] p-6 shadow-lg duration-200 sm:max-w-lg",
+        "bg-[#0A0A0B] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-0 rounded-2xl border border-white/10 shadow-2xl shadow-black/60 duration-200 sm:max-w-lg",
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-        <XIcon />
+      <DialogPrimitive.Close className="absolute top-6 right-6 rounded-lg p-2 opacity-70 transition-all hover:opacity-100 hover:bg-white/5 focus:ring-2 focus:ring-cyan-400/20 focus:outline-hidden disabled:pointer-events-none">
+        <XIcon className="h-5 w-5 text-gray-400" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
@@ -91,7 +91,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     data-slot="dialog-header"
-    className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+    className={cn("flex flex-col gap-3 px-8 pt-8 pb-6", className)}
     {...props}
   />
 );
@@ -104,7 +104,7 @@ const DialogFooter = ({
   <div
     data-slot="dialog-footer"
     className={cn(
-      "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+      "flex flex-col-reverse gap-3 px-8 pb-8 pt-6 border-t border-white/5 sm:flex-row sm:justify-end",
       className,
     )}
     {...props}
@@ -119,7 +119,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     data-slot="dialog-title"
-    className={cn("text-lg leading-none font-semibold", className)}
+    className={cn("text-3xl text-white tracking-tight", className)}
     {...props}
   />
 ));
@@ -132,11 +132,63 @@ const DialogDescription = React.forwardRef<
   <DialogPrimitive.Description
     ref={ref}
     data-slot="dialog-description"
-    className={cn("text-muted-foreground text-sm", className)}
+    className={cn("text-gray-400 text-base", className)}
     {...props}
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
+
+// New component for dialog body sections with dividers
+const DialogBody = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    data-slot="dialog-body"
+    className={cn("px-8 py-6 space-y-6", className)}
+    {...props}
+  />
+);
+DialogBody.displayName = "DialogBody";
+
+// New component for dialog sections with labels
+const DialogSection = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    data-slot="dialog-section"
+    className={cn("space-y-3", className)}
+    {...props}
+  />
+);
+DialogSection.displayName = "DialogSection";
+
+// New component for dialog section labels (with icons)
+const DialogSectionLabel = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    data-slot="dialog-section-label"
+    className={cn("flex items-center gap-2 text-gray-400 text-sm", className)}
+    {...props}
+  />
+);
+DialogSectionLabel.displayName = "DialogSectionLabel";
+
+// New component for dialog dividers
+const DialogDivider = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    data-slot="dialog-divider"
+    className={cn("h-px bg-white/5 my-6", className)}
+    {...props}
+  />
+);
+DialogDivider.displayName = "DialogDivider";
 
 export {
   Dialog,
@@ -149,4 +201,8 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  DialogBody,
+  DialogSection,
+  DialogSectionLabel,
+  DialogDivider,
 };

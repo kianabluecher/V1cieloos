@@ -3,6 +3,7 @@ import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import { createClient } from "npm:@supabase/supabase-js";
 import * as kv from "./kv_store.tsx";
+import authApp from "./auth.tsx";
 
 const app = new Hono();
 
@@ -11,6 +12,100 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
+
+// ============================================
+// AUTO-CREATE KV STORE TABLE IF IT DOESN'T EXIST
+// ============================================
+// This runs on server startup to ensure the required table exists
+(async () => {
+  try {
+    console.log('🔍 Checking if kv_store_c3abf285 table exists...');
+    
+    // Test if table exists by attempting a simple query
+    const { error: testError } = await supabase
+      .from('kv_store_c3abf285')
+      .select('key')
+      .limit(1);
+    
+    if (testError && testError.message.includes('does not exist')) {
+      console.log('⚠️ Table kv_store_c3abf285 does not exist. Creating it now...');
+      
+      // Create table using Supabase client with raw SQL
+      const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS public.kv_store_c3abf285 (
+          key TEXT NOT NULL PRIMARY KEY,
+          value JSONB NOT NULL
+        );
+        
+        GRANT ALL ON public.kv_store_c3abf285 TO postgres;
+        GRANT ALL ON public.kv_store_c3abf285 TO service_role;
+        GRANT ALL ON public.kv_store_c3abf285 TO authenticated;
+        GRANT ALL ON public.kv_store_c3abf285 TO anon;
+        
+        CREATE INDEX IF NOT EXISTS idx_kv_store_c3abf285_key ON public.kv_store_c3abf285(key);
+        
+        INSERT INTO public.kv_store_c3abf285 (key, value) 
+        VALUES ('_table_created', '{"created_at": "' || NOW()::TEXT || '", "auto_created": true}'::JSONB)
+        ON CONFLICT (key) DO NOTHING;
+      `;
+      
+      // Use Supabase's SQL execution - try multiple methods
+      try {
+        // Method 1: Try using query parameter
+        const { data, error } = await supabase.rpc('exec_sql', { sql: createTableSQL });
+        
+        if (error) {
+          console.log('RPC method not available, trying alternative...');
+          
+          // Method 2: Direct PostgreSQL connection string
+          const dbUrl = Deno.env.get('SUPABASE_DB_URL');
+          if (dbUrl) {
+            console.log('Using direct database connection...');
+            const { Client } = await import('https://deno.land/x/postgres@v0.17.0/mod.ts');
+            const client = new Client(dbUrl);
+            await client.connect();
+            await client.queryArray(createTableSQL);
+            await client.end();
+            console.log('✅ Table created successfully via direct connection!');
+          } else {
+            throw new Error('No database URL available');
+          }
+        } else {
+          console.log('✅ Table created successfully via RPC!');
+        }
+      } catch (createError) {
+        console.error('❌ Auto-creation failed:', createError);
+        console.log('');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('⚠️  MANUAL ACTION REQUIRED');
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('');
+        console.log('Please create the KV store table manually:');
+        console.log('');
+        console.log('1. Go to: https://supabase.com/dashboard');
+        console.log('2. Select your project');
+        console.log('3. Go to: SQL Editor → New query');
+        console.log('4. Copy and run this SQL:');
+        console.log('');
+        console.log('   CREATE TABLE public.kv_store_c3abf285 (');
+        console.log('     key TEXT PRIMARY KEY,');
+        console.log('     value JSONB NOT NULL');
+        console.log('   );');
+        console.log('   GRANT ALL ON public.kv_store_c3abf285 TO postgres, service_role, authenticated;');
+        console.log('');
+        console.log('5. Wait 10 seconds, then refresh your dashboard');
+        console.log('');
+        console.log('═══════════════════════════════════════════════════════════');
+      }
+    } else if (testError) {
+      console.log('⚠️ Table check error:', testError.message);
+    } else {
+      console.log('✅ Table kv_store_c3abf285 exists and is accessible');
+    }
+  } catch (error) {
+    console.error('⚠️ Table initialization check failed:', error);
+  }
+})();
 
 // Enable logger
 app.use('*', logger(console.log));
@@ -63,13 +158,125 @@ let storageAvailable = false;
 })();
 
 // Health check endpoint
-app.get("/make-server-c3abf285/health", (c) => {
+app.get("/make-server-c3abf285/health", async (c) => {
+  let kvStoreStatus = 'unknown';
+  let kvStoreError = null;
+  let tableExists = false;
+  
+  try {
+    // Test KV store connection
+    await kv.get('health_check_test');
+    kvStoreStatus = 'connected';
+    tableExists = true;
+  } catch (error) {
+    kvStoreStatus = 'error';
+    kvStoreError = error?.message;
+    console.error('[HEALTH] KV Store error:', error);
+    
+    // Check if it's a table missing error
+    if (error?.message && error.message.includes('does not exist')) {
+      tableExists = false;
+    }
+  }
+  
   return c.json({ 
     status: "ok",
     storageAvailable: storageAvailable,
+    kvStoreStatus: kvStoreStatus,
+    kvStoreError: kvStoreError,
+    kvStoreTable: 'kv_store_c3abf285',
+    tableExists: tableExists,
     timestamp: new Date().toISOString(),
     crmRoutesAvailable: true,
-    version: "1.0.1"
+    version: "1.0.3",
+    setupInstructions: !tableExists ? {
+      message: "KV store table missing. Please create it manually.",
+      steps: [
+        "1. Go to Supabase Dashboard → SQL Editor",
+        "2. Click 'New query'",
+        "3. Paste: CREATE TABLE public.kv_store_c3abf285 (key TEXT PRIMARY KEY, value JSONB NOT NULL);",
+        "4. Run: GRANT ALL ON public.kv_store_c3abf285 TO postgres, service_role, authenticated;",
+        "5. Wait 10 seconds and refresh your dashboard"
+      ]
+    } : undefined
+  });
+});
+
+// Diagnostic endpoint to check table and provide setup instructions
+app.get("/make-server-c3abf285/setup-check", async (c) => {
+  const results = {
+    timestamp: new Date().toISOString(),
+    checks: [] as any[]
+  };
+  
+  // Check 1: Table exists
+  try {
+    const { error } = await supabase
+      .from('kv_store_c3abf285')
+      .select('key')
+      .limit(1);
+    
+    if (error && error.message.includes('does not exist')) {
+      results.checks.push({
+        name: 'KV Store Table',
+        status: 'missing',
+        message: 'Table kv_store_c3abf285 does not exist',
+        action: 'CREATE_TABLE_REQUIRED'
+      });
+    } else if (error) {
+      results.checks.push({
+        name: 'KV Store Table',
+        status: 'error',
+        message: error.message,
+        action: 'CHECK_PERMISSIONS'
+      });
+    } else {
+      results.checks.push({
+        name: 'KV Store Table',
+        status: 'ok',
+        message: 'Table exists and is accessible'
+      });
+    }
+  } catch (e) {
+    results.checks.push({
+      name: 'KV Store Table',
+      status: 'error',
+      message: e.message
+    });
+  }
+  
+  // Check 2: KV store module
+  try {
+    await kv.get('_setup_test');
+    results.checks.push({
+      name: 'KV Store Module',
+      status: 'ok',
+      message: 'Module is working correctly'
+    });
+  } catch (e) {
+    results.checks.push({
+      name: 'KV Store Module',
+      status: 'error',
+      message: e.message
+    });
+  }
+  
+  // Check 3: Storage bucket
+  results.checks.push({
+    name: 'Storage Bucket',
+    status: storageAvailable ? 'ok' : 'unavailable',
+    message: storageAvailable ? 'Storage is available' : 'Using KV store fallback'
+  });
+  
+  // Determine overall status
+  const hasErrors = results.checks.some(c => c.status === 'error' || c.status === 'missing');
+  
+  return c.json({
+    overall: hasErrors ? 'action_required' : 'healthy',
+    ...results,
+    setupSQL: results.checks.some(c => c.action === 'CREATE_TABLE_REQUIRED') ? 
+      `-- Run this in Supabase SQL Editor\nCREATE TABLE IF NOT EXISTS public.kv_store_c3abf285 (\n  key TEXT NOT NULL PRIMARY KEY,\n  value JSONB NOT NULL\n);\n\nGRANT ALL ON public.kv_store_c3abf285 TO postgres;\nGRANT ALL ON public.kv_store_c3abf285 TO service_role;\nGRANT ALL ON public.kv_store_c3abf285 TO authenticated;\nGRANT ALL ON public.kv_store_c3abf285 TO anon;\n\nCREATE INDEX IF NOT EXISTS idx_kv_store_c3abf285_key ON public.kv_store_c3abf285(key);`
+      : undefined
   });
 });
 
@@ -387,11 +594,27 @@ app.post("/make-server-c3abf285/brand", async (c) => {
 // File management endpoints
 app.get("/make-server-c3abf285/files", async (c) => {
   try {
-    const files = await kv.get('uploaded_files') || [];
-    return c.json({ success: true, data: files });
+    console.log('[FILES] Fetching files from KV store...');
+    console.log('[FILES] KV Store table: kv_store_c3abf285');
+    
+    const files = await kv.get('uploaded_files');
+    console.log('[FILES] Raw result from kv.get:', files);
+    
+    const filesList = files || [];
+    console.log('[FILES] Files fetched successfully:', filesList.length, 'files');
+    
+    return c.json({ success: true, data: filesList });
   } catch (error) {
-    console.error('Error fetching files:', error);
-    return c.json({ success: false, error: 'Failed to fetch files' }, 500);
+    console.error('[FILES] Error fetching files:', error);
+    console.error('[FILES] Error message:', error?.message);
+    console.error('[FILES] Error stack:', error?.stack);
+    console.error('[FILES] Error name:', error?.name);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch files',
+      details: error?.message || 'Unknown error',
+      errorType: error?.name || 'Unknown'
+    }, 500);
   }
 });
 
@@ -1336,11 +1559,12 @@ app.delete("/make-server-c3abf285/assets/:id", async (c) => {
 // Activity Logs
 app.get("/make-server-c3abf285/activity", async (c) => {
   try {
-    const activities = await kv.get('activity_logs') || [];
-    return c.json({ success: true, data: activities });
+    const activities = await kv.get('activity_logs');
+    // Return empty array if no activities exist yet
+    return c.json({ success: true, data: activities || [] });
   } catch (error) {
     console.error('Error fetching activity logs:', error);
-    return c.json({ success: false, error: 'Failed to fetch activity logs' }, 500);
+    return c.json({ success: false, error: 'Failed to fetch activity logs', data: [] }, 500);
   }
 });
 
@@ -1521,6 +1745,8 @@ app.delete("/make-server-c3abf285/assets/:assetId", async (c) => {
 // Initialize Demo Data
 app.post("/make-server-c3abf285/init-demo", async (c) => {
   try {
+    console.log('Starting demo data initialization...');
+    
     // Initialize activity logs with sample data
     const sampleActivities = [
       {
@@ -1558,9 +1784,13 @@ app.post("/make-server-c3abf285/init-demo", async (c) => {
       }
     ];
     
+    console.log('Saving activity logs data...');
     await kv.set('activity_logs', sampleActivities);
+    
+    console.log('Initializing client assets...');
     await kv.set('client_assets', []);
     
+    console.log('Preparing quotes demo data...');
     // Initialize Quotes Demo Data
     const demoCustomers = [
       {
@@ -1751,9 +1981,16 @@ app.post("/make-server-c3abf285/init-demo", async (c) => {
       }
     ];
     
+    console.log('Saving customers data...');
     await kv.set('customers', demoCustomers);
+    
+    console.log('Saving catalog items data...');
     await kv.set('catalog_items', demoCatalogItems);
+    
+    console.log('Saving quotes data...');
     await kv.set('quotes', demoQuotes);
+    
+    console.log('Demo data initialization completed successfully');
     
     return c.json({ 
       success: true,
@@ -1761,7 +1998,12 @@ app.post("/make-server-c3abf285/init-demo", async (c) => {
     });
   } catch (error) {
     console.error('Error initializing demo data:', error);
-    return c.json({ success: false, error: 'Failed to initialize demo data' }, 500);
+    console.error('Error details:', error?.message, error?.stack);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to initialize demo data',
+      details: error?.message || 'Unknown error'
+    }, 500);
   }
 });
 
@@ -3092,5 +3334,8 @@ app.notFound((c) => {
     hint: "Check /make-server-c3abf285/routes for available endpoints"
   }, 404);
 });
+
+// Mount auth routes
+app.route("/make-server-c3abf285/auth", authApp);
 
 Deno.serve(app.fetch);

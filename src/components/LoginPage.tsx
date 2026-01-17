@@ -5,6 +5,8 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Bot, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner@2.0.3";
+import { api } from "../utils/supabase/client";
+import { GoogleOAuthSetupDialog } from "./GoogleOAuthSetupDialog";
 
 type LoginPageProps = {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -13,8 +15,11 @@ type LoginPageProps = {
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [showSetupDialog, setShowSetupDialog] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +29,74 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       return;
     }
 
+    if (mode === "signup" && !name) {
+      toast.error("Please enter your name");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await onLogin(email, password);
+      if (mode === "signup") {
+        const result = await api.signup(email, password, name);
+        if (result.success) {
+          toast.success("Account created! Please sign in.");
+          setMode("signin");
+          setPassword("");
+        } else {
+          toast.error(result.error || "Failed to create account");
+        }
+      } else {
+        await onLogin(email, password);
+      }
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Invalid credentials");
+      console.error("Auth error:", error);
+      toast.error(mode === "signup" ? "Failed to create account" : "Invalid credentials");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const result = await api.googleSignIn();
+      if (result.success) {
+        // The OAuth flow will redirect to Google and back
+        toast.info("Redirecting to Google...");
+      } else {
+        // Check if it's a provider not enabled error
+        if (result.error && (result.error.includes('provider') || result.error.includes('not enabled') || result.error.includes('disabled'))) {
+          toast.error("Google Sign-In is not configured yet", {
+            description: "Please set up Google OAuth in your Supabase dashboard first",
+            duration: 8000,
+          });
+          console.error('═══════════════════════════════════════════════════════════');
+          console.error('⚠️  GOOGLE OAUTH SETUP REQUIRED');
+          console.error('═══════════════════════════════════════════════════════════');
+          console.error('');
+          console.error('To enable Google Sign-In:');
+          console.error('');
+          console.error('1. Go to: https://supabase.com/dashboard');
+          console.error('2. Select your project → Authentication → Providers');
+          console.error('3. Find "Google" and click to enable it');
+          console.error('4. Follow the setup wizard to:');
+          console.error('   - Create OAuth credentials in Google Cloud Console');
+          console.error('   - Add authorized redirect URIs');
+          console.error('   - Copy Client ID and Client Secret to Supabase');
+          console.error('');
+          console.error('Full guide: https://supabase.com/docs/guides/auth/social-login/auth-google');
+          console.error('═══════════════════════════════════════════════════════════');
+          setShowSetupDialog(true);
+        } else {
+          toast.error(result.error || "Failed to initiate Google sign in");
+        }
+      }
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      toast.error("Failed to sign in with Google", {
+        description: "Google OAuth may not be configured. Check console for setup instructions.",
+        duration: 6000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -102,13 +169,49 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </div>
             </div>
 
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-white">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  className="bg-dark-bg border-border-subtle text-white placeholder:text-text-secondary"
+                  disabled={isLoading}
+                />
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full bg-cyan-accent hover:bg-cyan-accent/80 text-dark-bg"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Signing in..." : mode === "signin" ? "Sign In" : "Sign Up"}
             </Button>
+
+            <Button
+              type="button"
+              className="w-full bg-gray-700 hover:bg-gray-800 text-white"
+              disabled={isLoading}
+              onClick={handleGoogleSignIn}
+            >
+              {isLoading ? "Signing in..." : "Sign in with Google"}
+            </Button>
+
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                className="text-sm text-gray-500 hover:text-gray-700"
+                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              >
+                {mode === "signin" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              </button>
+            </div>
           </form>
 
           {/* Demo Credentials */}
@@ -133,6 +236,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </div>
         </Card>
       </div>
+      <GoogleOAuthSetupDialog isOpen={showSetupDialog} onClose={() => setShowSetupDialog(false)} />
     </div>
   );
 }

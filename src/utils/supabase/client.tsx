@@ -28,6 +28,206 @@ export const api = {
     }
   },
 
+  // ============================================
+  // AUTHENTICATION
+  // ============================================
+
+  // Sign up
+  signup: async (email: string, password: string, name: string, userType: string = 'client') => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify({ email, password, name, userType })
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Signup error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Sign in
+  signin: async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify({ email, password })
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Signin error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Google OAuth sign in
+  googleSignIn: async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Handle Google OAuth callback (called after redirect from Google)
+  handleOAuthCallback: async () => {
+    try {
+      // Get the current session from Supabase (it handles the URL hash automatically)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error('Failed to get session:', sessionError);
+        return { success: false, error: 'Failed to get session after OAuth' };
+      }
+
+      // Now call our backend to create/update user profile
+      const response = await fetch(`${BASE_URL}/auth/google-callback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify({ accessToken: session.access_token })
+      });
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        return result;
+      }
+
+      // Return user profile with proper structure for App.tsx
+      return {
+        success: true,
+        user: {
+          name: result.data.profile.name,
+          email: result.data.profile.email,
+          companyName: result.data.profile.companyName || '',
+          role: result.data.profile.role || 'Client',
+          userType: result.data.profile.userType || 'client',
+          accessToken: session.access_token
+        }
+      };
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Handle Google OAuth callback
+  googleCallback: async (accessToken: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/google-callback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify({ accessToken })
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Google callback error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get user profile
+  getUserProfile: async (accessToken: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/profile`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Get profile error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Update user profile
+  updateUserProfile: async (accessToken: string, data: any) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Invite user (admin only)
+  inviteUser: async (accessToken: string, email: string, userType: string, name?: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/invite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ email, userType, name })
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Invite user error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get all users (admin only)
+  getAllUsers: async (accessToken: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/users`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Get users error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Sign out
+  signout: async (accessToken: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/signout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Signout error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   // Brand Information
   getBrandInfo: async () => {
     try {

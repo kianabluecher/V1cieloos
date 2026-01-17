@@ -32,6 +32,7 @@ import {
   Download,
   Clock,
   CheckCircle2,
+  RefreshCw,
 } from "lucide-react";
 import { api } from "../../utils/supabase/client";
 import { toast } from "sonner@2.0.3";
@@ -89,9 +90,16 @@ export function ActivityLogPage() {
       const response = await api.getActivityLogs();
       if (response.success && response.data) {
         setActivities(response.data);
+      } else if (response.success && !response.data) {
+        // Empty data is still success
+        setActivities([]);
+      } else {
+        console.error("Error fetching activity logs:", response.error);
+        toast.error("Failed to load activity logs");
       }
     } catch (error) {
-      console.error("Error loading activities:", error);
+      console.error("Error fetching activity logs:", error);
+      toast.error("Failed to load activity logs. Please try refreshing.");
     }
   };
 
@@ -281,11 +289,22 @@ export function ActivityLogPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl text-white mb-1">Activity Log</h2>
-        <p className="text-text-secondary">
-          Track user sign-ins, task views, and system activity
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl text-white mb-1">Activity Log</h2>
+          <p className="text-text-secondary">
+            Track user sign-ins, task views, and system activity
+          </p>
+        </div>
+        <Button
+          onClick={loadActivities}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </div>
 
       {/* Stats Cards */}

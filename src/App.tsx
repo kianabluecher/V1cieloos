@@ -69,6 +69,7 @@ import { BrandWebPage } from "./components/pages/BrandWebPage";
 import { LeadGenPage } from "./components/pages/LeadGenPage";
 import { AdsPage } from "./components/pages/AdsPage";
 import { api } from "./utils/supabase/client";
+import { SetupHelper } from "./components/SetupHelper";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -81,6 +82,8 @@ export default function App() {
   const [strategySubmenu, setStrategySubmenu] = useState<"overview" | "social" | "brandweb" | "leadgen" | "ads" | null>(null);
   const [archiveDetailItem, setArchiveDetailItem] = useState<any>(null);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(["clients", "billing"]);
+  const [setupError, setSetupError] = useState<string | null>(null);
+  const [isHandlingOAuthCallback, setIsHandlingOAuthCallback] = useState(false);
   const [currentUser, setCurrentUser] = useState({
     name: "Sarah Johnson",
     email: "sarah@client.com",
@@ -92,6 +95,7 @@ export default function App() {
 
   // Load initial data and check for saved session
   useEffect(() => {
+    handleOAuthCallback();
     seedInitialData();
     checkSavedSession();
     handleInitialRoute();
@@ -197,10 +201,176 @@ export default function App() {
 
   const seedInitialData = async () => {
     try {
-      await api.initializeDemoData();
-      console.log("Demo data initialized");
+      console.log('[App] Initializing demo data...');
+      const response = await api.initializeDemoData();
+      console.log('[App] Demo data response:', response);
+      
+      if (response.success) {
+        console.log("[App] Demo data initialized successfully");
+      } else {
+        console.error("[App] Failed to initialize demo data:", response.error);
+        console.error("[App] Error details:", response.details);
+        
+        // Check if this is a table missing error
+        const errorDetails = response.details || response.error || '';
+        if (errorDetails.includes('kv_store_c3abf285') && errorDetails.includes('does not exist')) {
+          console.error('═══════════════════════════════════════════════════════════');
+          console.error('⚠️  DATABASE SETUP REQUIRED');
+          console.error('═══════════════════════════════════════════════════════════');
+          console.error('');
+          console.error('The KV store table is missing. Please create it:');
+          console.error('');
+          console.error('1. Go to: https://supabase.com/dashboard');
+          console.error('2. Select your project → SQL Editor → New query');
+          console.error('3. Paste and run this SQL:');
+          console.error('');
+          console.error('   CREATE TABLE public.kv_store_c3abf285 (');
+          console.error('     key TEXT PRIMARY KEY,');
+          console.error('     value JSONB NOT NULL');
+          console.error('   );');
+          console.error('');
+          console.error('   GRANT ALL ON public.kv_store_c3abf285 TO postgres, service_role, authenticated;');
+          console.error('');
+          console.error('4. Wait 10 seconds, then refresh this page');
+          console.error('');
+          console.error('Alternatively, check /create_kv_store_table.sql for the full setup script');
+          console.error('═══════════════════════════════════════════════════════════');
+          
+          // Show visual setup helper
+          setSetupError(errorDetails);
+          
+          toast.error('Database setup required - Follow the on-screen instructions', {
+            duration: 10000,
+          });
+        } else {
+          toast.error(`Failed to initialize demo data: ${response.details || response.error}`);
+        }
+        
+        // Don't retry if it's a table missing error (it won't help)
+        if (!errorDetails.includes('does not exist')) {
+          // Retry once after a short delay for other errors
+          setTimeout(async () => {
+            try {
+              console.log('[App] Retrying demo data initialization...');
+              const retryResponse = await api.initializeDemoData();
+              if (retryResponse.success) {
+                console.log("[App] Demo data initialized on retry");
+                toast.success("Demo data initialized successfully");
+              } else {
+                console.error("[App] Retry also failed:", retryResponse);
+              }
+            } catch (retryError) {
+              console.error("[App] Retry failed:", retryError);
+            }
+          }, 2000);
+        }
+      }
     } catch (error) {
-      console.error("Error initializing demo data:", error);
+      console.error("[App] Error initializing demo data:", error);
+      console.error("[App] Error message:", error?.message);
+      
+      // Check if this is a table missing error
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('kv_store_c3abf285') && errorMessage.includes('does not exist')) {
+        console.error('═══════════════════════════════════════════════════════════');
+        console.error('⚠️  DATABASE SETUP REQUIRED - See instructions above');
+        console.error('═══════════════════════════════════════════════════════════');
+        
+        // Show visual setup helper
+        setSetupError(errorMessage);
+        
+        toast.error('Database setup required - Follow the on-screen instructions', {
+          duration: 10000,
+        });
+      } else {
+        toast.error(`Error initializing demo data: ${error?.message || 'Unknown error'}`);
+        
+        // Retry once after a short delay for other errors
+        setTimeout(async () => {
+          try {
+            console.log('[App] Retrying after exception...');
+            await api.initializeDemoData();
+            console.log("[App] Demo data initialized on retry");
+          } catch (retryError) {
+            console.error("[App] Retry failed:", retryError);
+          }
+        }, 2000);
+      }
+    }
+  };
+
+  const handleOAuthCallback = async () => {
+    // Check if we're on the auth callback route
+    if (window.location.pathname === '/auth/callback' || window.location.hash) {
+      console.log('[OAuth] Detected OAuth callback');
+      setIsHandlingOAuthCallback(true);
+      
+      try {
+        const response = await api.handleOAuthCallback();
+        
+        if (response.success && response.user) {
+          const user = response.user;
+          console.log('[OAuth] Callback successful, user:', user);
+          
+          setCurrentUser({
+            name: user.name,
+            email: user.email,
+            companyName: user.companyName || '',
+            role: user.role,
+            userType: user.userType
+          });
+          setViewMode(user.userType);
+          setIsAuthenticated(true);
+
+          // Save session to localStorage
+          const sessionData = {
+            user: {
+              name: user.name,
+              email: user.email,
+              companyName: user.companyName || '',
+              role: user.role,
+              userType: user.userType
+            },
+            viewMode: user.userType,
+            activeNav: user.userType === "management" ? "clients" : user.userType === "team" ? "clients" : "hub",
+            timestamp: new Date().toISOString(),
+            accessToken: user.accessToken
+          };
+          localStorage.setItem("cielo_session", JSON.stringify(sessionData));
+
+          // Log login activity to backend
+          try {
+            await api.logActivity({
+              userId: user.email,
+              userName: user.name,
+              userEmail: user.email,
+              userType: user.userType,
+              action: "sign_in_google",
+              description: `${user.name} signed in to CIELO OS via Google`,
+              metadata: { method: 'google_oauth' },
+            });
+          } catch (error) {
+            console.error("Error logging activity:", error);
+          }
+
+          toast.success(`Welcome, ${user.name}!`);
+          
+          // Clean up URL and redirect to dashboard
+          const targetNav = user.userType === "management" ? "clients" : user.userType === "team" ? "clients" : "hub";
+          setActiveNav(targetNav);
+          
+          // Replace URL without hash/query params
+          window.history.replaceState({}, '', '/');
+        } else {
+          console.error('[OAuth] Callback failed:', response.error);
+          toast.error(`Sign in failed: ${response.error || 'Unknown error'}`);
+        }
+      } catch (error) {
+        console.error("[OAuth] Error handling OAuth callback:", error);
+        toast.error("An error occurred during sign in");
+      } finally {
+        setIsHandlingOAuthCallback(false);
+      }
     }
   };
 
@@ -862,7 +1032,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg dark flex">
+    <>
+      {/* Setup Helper Modal */}
+      <SetupHelper 
+        error={setupError || undefined} 
+        onDismiss={() => setSetupError(null)} 
+      />
+      
+      <div className="min-h-screen bg-dark-bg dark flex">
       {/* Sidebar */}
       <div
         className={`${
@@ -1189,5 +1366,6 @@ export default function App() {
 
       <Toaster />
     </div>
+    </>
   );
 }

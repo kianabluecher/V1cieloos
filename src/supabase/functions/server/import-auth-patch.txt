@@ -1,0 +1,5 @@
+// Add this import at the top of /supabase/functions/server/index.tsx after line 5:
+import authApp from "./auth.tsx";
+
+// Add this route mounting before Deno.serve(app.fetch); (around line 3337):
+app.route("/make-server-c3abf285/auth", authApp);
