@@ -47,6 +47,11 @@
   --midnight: #0B0D17;
   --dark-navy: #1A1D29;
   --card-glow: rgba(0, 123, 255, 0.1);
+  
+  /* Semantic border colors for light mode */
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --card-bg: #ffffff;
+  --dark-bg: #f9f9f9;
 }
 
 .dark {
@@ -85,7 +90,7 @@
   --sidebar-border: #333333;
   --sidebar-ring: #A6E0FF;
   
-  /* New Style Guide Colors */
+  /* New Style Guide Colors for dark mode */
   --cyan-accent: #A6E0FF;
   --dark-bg: #0A0A0A;
   --card-bg: #111111;
@@ -140,9 +145,9 @@
   --color-dark-bg: var(--dark-bg);
   --color-card-bg: var(--card-bg);
   --color-border-subtle: var(--border-subtle);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-inactive: var(--text-inactive);
+  --color-text-primary: var(--text-primary, var(--foreground));
+  --color-text-secondary: var(--text-secondary, var(--muted-foreground));
+  --color-text-inactive: var(--text-inactive, var(--muted-foreground));
   
   /* CIELO OS Custom Colors */
   --color-electric-blue: var(--electric-blue);
@@ -276,13 +281,20 @@ html {
   
   /* Glass morphism effects */
   .glass {
-    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .glass-card {
+  /* Light mode - subtle glass effect */
+  :root .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Dark mode - dark glass effect */
+  .dark .glass-card {
     background: rgba(17, 17, 17, 0.8);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);

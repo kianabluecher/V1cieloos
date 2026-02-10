@@ -36,6 +36,8 @@ import {
   List,
   BarChart3,
   Building2,
+  Sun,
+  Moon,
 } from "lucide-react";
 import cieloLogo from "./assets/cielo-logo-new.svg";
 import { LoginPage } from "./components/LoginPage";
@@ -84,6 +86,7 @@ export default function App() {
   const [expandedMenus, setExpandedMenus] = useState<string[]>(["clients", "billing"]);
   const [setupError, setSetupError] = useState<string | null>(null);
   const [isHandlingOAuthCallback, setIsHandlingOAuthCallback] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [currentUser, setCurrentUser] = useState({
     name: "Sarah Johnson",
     email: "sarah@client.com",
@@ -99,6 +102,7 @@ export default function App() {
     seedInitialData();
     checkSavedSession();
     handleInitialRoute();
+    loadThemePreference();
   }, []);
 
   // Handle browser back/forward buttons
@@ -197,6 +201,41 @@ export default function App() {
       console.error("Error restoring session:", error);
       localStorage.removeItem("cielo_session");
     }
+  };
+
+  // Load theme preference from localStorage
+  const loadThemePreference = () => {
+    try {
+      const savedTheme = localStorage.getItem("cielo_theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setTheme(savedTheme);
+        applyTheme(savedTheme);
+      } else {
+        // Default to dark mode
+        applyTheme("dark");
+      }
+    } catch (error) {
+      console.error("Error loading theme preference:", error);
+      applyTheme("dark");
+    }
+  };
+
+  // Apply theme to document
+  const applyTheme = (newTheme: "light" | "dark") => {
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  // Toggle theme
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    localStorage.setItem("cielo_theme", newTheme);
+    toast.success(`Switched to ${newTheme} mode`);
   };
 
   const seedInitialData = async () => {
@@ -808,10 +847,10 @@ export default function App() {
                 </Button>
               </div>
               
-              <Card className="border-border-subtle p-8" style={{ backgroundColor: '#1A1A1A' }}>
+              <Card className="border-border p-8">
                 <div className="space-y-6">
                   <div>
-                    <h1 className="text-3xl text-white mb-2">{archiveDetailItem.title}</h1>
+                    <h1 className="text-3xl text-foreground mb-2">{archiveDetailItem.title}</h1>
                     <div className="flex items-center gap-4 text-sm text-text-secondary">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
@@ -829,21 +868,21 @@ export default function App() {
                     </div>
                   </div>
                   
-                  <Separator className="bg-border-subtle" />
+                  <Separator className="bg-border" />
                   
-                  <div className="prose prose-invert max-w-none">
-                    <div className="text-white whitespace-pre-wrap leading-relaxed">
+                  <div className="prose dark:prose-invert max-w-none">
+                    <div className="text-foreground whitespace-pre-wrap leading-relaxed">
                       {archiveDetailItem.content || archiveDetailItem.description}
                     </div>
                   </div>
                   
                   {archiveDetailItem.transcript && (
                     <>
-                      <Separator className="bg-border-subtle" />
+                      <Separator className="bg-border" />
                       <div>
-                        <h3 className="text-xl text-white mb-4">Full Transcript</h3>
-                        <div className="bg-dark-bg p-6 rounded-lg border border-border-subtle">
-                          <p className="text-text-secondary whitespace-pre-wrap leading-relaxed">
+                        <h3 className="text-xl text-foreground mb-4">Full Transcript</h3>
+                        <div className="bg-muted p-6 rounded-lg border border-border">
+                          <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
                             {archiveDetailItem.transcript}
                           </p>
                         </div>
@@ -862,16 +901,13 @@ export default function App() {
           <div className="space-y-8">
             {/* Hero Welcome Section */}
             <Card 
-              className="relative overflow-hidden border-border-subtle"
-              style={{
-                background: 'linear-gradient(135deg, #1a2332 0%, #0f1419 100%)'
-              }}
+              className="relative overflow-hidden border-border bg-card dark:bg-gradient-to-br dark:from-[#1a2332] dark:to-[#0f1419]"
             >
               <div className="absolute top-8 right-8">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-border-subtle hover:bg-cyan-accent/10 hover:border-cyan-accent text-white"
+                  className="border-border hover:bg-cyan-accent/10 hover:border-cyan-accent"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Upload new Document
@@ -883,25 +919,25 @@ export default function App() {
                   <Sparkles className="h-6 w-6 text-cyan-accent" />
                 </div>
                 
-                <h1 className="text-4xl text-white mb-4">
+                <h1 className="text-4xl text-foreground mb-4">
                   Hello, {currentUser.name.split(' ')[0] || 'there'}
                 </h1>
                 
-                <p className="text-text-secondary text-lg max-w-2xl mb-8">
+                <p className="text-muted-foreground text-lg max-w-2xl mb-8">
                   Good afternoon! Have a look into your recent insights generated by our agents based on our last strategy sessions and resources.
                 </p>
                 
                 <div className="flex items-center gap-4 mb-6">
                   <Badge 
                     variant="outline" 
-                    className="bg-dark-bg/50 border-border-subtle text-white px-4 py-2"
+                    className="bg-muted/50 border-border text-foreground px-4 py-2"
                   >
                     <CheckSquare className="h-4 w-4 mr-2" />
                     7 Open Tasks
                   </Badge>
                   <Badge 
                     variant="outline" 
-                    className="bg-dark-bg/50 border-border-subtle text-white px-4 py-2"
+                    className="bg-muted/50 border-border text-foreground px-4 py-2"
                   >
                     <Calendar className="h-4 w-4 mr-2 text-green-400" />
                     Next: Today 2:30 PM
@@ -909,7 +945,7 @@ export default function App() {
                 </div>
                 
                 <Button 
-                  className="bg-cyan-accent hover:bg-cyan-accent/80 text-dark-bg"
+                  className="bg-cyan-accent hover:bg-cyan-accent/80 text-primary-foreground"
                   onClick={() => {
                     setActiveNav("design");
                   }}
@@ -922,13 +958,13 @@ export default function App() {
 
 
 
-            <Separator className="bg-border-subtle" />
+            <Separator className="bg-border" />
 
             {/* Your Strategy */}
             <section>
               <div className="mb-6">
-                <h3 className="text-white">Your Strategy</h3>
-                <p className="text-text-secondary mt-1">
+                <h3 className="text-foreground">Your Strategy</h3>
+                <p className="text-muted-foreground mt-1">
                   AI-generated strategy and downloadable reports
                 </p>
               </div>
@@ -936,13 +972,13 @@ export default function App() {
               <StrategySection />
             </section>
 
-            <Separator className="bg-border-subtle" />
+            <Separator className="bg-border" />
 
             {/* Brand Information */}
             <section>
               <div className="mb-6">
-                <h3 className="text-white">Brand Information</h3>
-                <p className="text-text-secondary mt-1">
+                <h3 className="text-foreground">Brand Information</h3>
+                <p className="text-muted-foreground mt-1">
                   Update your brand details for better AI recommendations
                 </p>
               </div>
@@ -950,13 +986,13 @@ export default function App() {
               <BrandInformation />
             </section>
 
-            <Separator className="bg-border-subtle" />
+            <Separator className="bg-border" />
 
             {/* Upload Files */}
             <section>
               <div className="mb-6">
-                <h3 className="text-white">Upload Files</h3>
-                <p className="text-text-secondary mt-1">
+                <h3 className="text-foreground">Upload Files</h3>
+                <p className="text-muted-foreground mt-1">
                   Share documents, assets, and resources with your AI agents
                 </p>
               </div>
@@ -965,14 +1001,14 @@ export default function App() {
             </section>
 
             {/* Sync Footer Controls */}
-            <Card className="p-4 glass-card border-border-subtle">
+            <Card className="p-4 bg-card border-border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
 
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-text-secondary hover:text-white hover:glow-cyan-soft transition-all duration-300"
+                    className="text-muted-foreground hover:text-foreground hover:glow-cyan-soft transition-all duration-300"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Refresh
@@ -980,7 +1016,7 @@ export default function App() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-text-secondary hover:text-white hover:glow-cyan-soft transition-all duration-300"
+                    className="text-muted-foreground hover:text-foreground hover:glow-cyan-soft transition-all duration-300"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Export
@@ -989,7 +1025,7 @@ export default function App() {
                     variant="ghost"
                     size="sm"
                     onClick={seedInitialData}
-                    className="text-text-secondary hover:text-white hover:glow-cyan-soft transition-all duration-300 opacity-30 hover:opacity-100"
+                    className="text-muted-foreground hover:text-foreground hover:glow-cyan-soft transition-all duration-300 opacity-30 hover:opacity-100"
                     title="Development: Seed initial data"
                   >
                     Seed Data
@@ -1003,7 +1039,7 @@ export default function App() {
                   >
                     All agents active
                   </Badge>
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-muted-foreground">
                     Last analysis: 2 hours ago
                   </span>
                 </div>
@@ -1039,28 +1075,28 @@ export default function App() {
         onDismiss={() => setSetupError(null)} 
       />
       
-      <div className="min-h-screen bg-dark-bg dark flex">
+      <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <div
         className={`${
           isSidebarCollapsed ? "w-20" : "w-64"
-        } bg-dark-bg border-r border-border-subtle flex flex-col transition-all duration-300 relative`}
+        } bg-background border-r border-border flex flex-col transition-all duration-300 relative`}
       >
         {/* Collapse Button */}
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="absolute -right-3 top-6 z-50 w-6 h-6 bg-card-bg border border-border-subtle rounded-full flex items-center justify-center hover:border-cyan-accent/30 hover:bg-cyan-accent/5 transition-all duration-300"
+          className="absolute -right-3 top-6 z-50 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center hover:border-cyan-accent/30 hover:bg-cyan-accent/5 transition-all duration-300"
           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeft
-            className={`h-3 w-3 text-text-secondary transition-transform duration-300 ${
+            className={`h-3 w-3 text-muted-foreground transition-transform duration-300 ${
               isSidebarCollapsed ? "rotate-180" : ""
             }`}
           />
         </button>
 
         {/* Logo & Project Selector */}
-        <div className="p-6 border-b border-border-subtle">
+        <div className="p-6 border-b border-border">
           <div
             className={`flex items-center gap-3 mb-4 ${
               isSidebarCollapsed ? "justify-center" : ""
@@ -1173,13 +1209,13 @@ export default function App() {
                   className={viewMode === "management"
                     ? `w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                         isActive && !hasSubItems
-                          ? "bg-[#1F1F1F] text-white"
-                          : "text-[#A0A0A0] hover:text-white hover:bg-[#1A1A1A]"
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                       }`
                     : `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 ${
                         isActive
                           ? "bg-cyan-accent/10 text-cyan-accent border border-cyan-accent/30 glow-cyan-soft"
-                          : "text-text-secondary hover:text-white hover:bg-cyan-accent/5 border border-transparent"
+                          : "text-muted-foreground hover:text-foreground hover:bg-cyan-accent/5 border border-transparent"
                       } ${isSidebarCollapsed ? "justify-center" : ""}`
                   }
                   title={isSidebarCollapsed ? item.label : undefined}
@@ -1213,7 +1249,7 @@ export default function App() {
                 
                 {/* Management View Hierarchical Submenu */}
                 {viewMode === "management" && hasSubItems && isExpanded && !isSidebarCollapsed && (
-                  <div className="ml-3 mt-1 space-y-1 border-l border-[#2A2A2A] pl-3">
+                  <div className="ml-3 mt-1 space-y-1 border-l border-border pl-3">
                     {item.subItems.map((subItem: any) => {
                       const SubIcon = subItem.icon;
                       const isSubActive = 
@@ -1237,8 +1273,8 @@ export default function App() {
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
                             isSubActive
-                              ? "text-white bg-[#1A1A1A]"
-                              : "text-[#808080] hover:text-white hover:bg-[#151515]"
+                              ? "text-foreground bg-muted"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           }`}
                         >
                           <SubIcon className="h-4 w-4 flex-shrink-0" />
@@ -1257,7 +1293,7 @@ export default function App() {
                       className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
                         !strategySubmenu
                           ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-cyan-accent/5"
                       }`}
                     >
                       Strategy Overview
@@ -1267,7 +1303,7 @@ export default function App() {
                       className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
                         strategySubmenu === "social"
                           ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-cyan-accent/5"
                       }`}
                     >
                       Social Media
@@ -1277,7 +1313,7 @@ export default function App() {
                       className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
                         strategySubmenu === "brandweb"
                           ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-cyan-accent/5"
                       }`}
                     >
                       Brand & Web
@@ -1287,7 +1323,7 @@ export default function App() {
                       className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
                         strategySubmenu === "leadgen"
                           ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-cyan-accent/5"
                       }`}
                     >
                       Lead Generation
@@ -1297,7 +1333,7 @@ export default function App() {
                       className={`w-full text-left px-3 py-1.5 rounded text-sm transition-all ${
                         strategySubmenu === "ads"
                           ? "text-cyan-accent bg-cyan-accent/5"
-                          : "text-gray-400 hover:text-white hover:bg-cyan-accent/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-cyan-accent/5"
                       }`}
                     >
                       Ads Management
@@ -1310,7 +1346,7 @@ export default function App() {
         </nav>
 
         {/* Profile Section */}
-        <div className="p-4 border-t border-border-subtle">
+        <div className="p-4 border-t border-border">
           <ProfileDropdown
             user={currentUser}
             onManageProfile={() => setActivePage("profile")}
@@ -1325,12 +1361,12 @@ export default function App() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-dark-bg border-b border-border-subtle">
+        <header className="bg-background border-b border-border">
           <div className="px-8 py-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-white">{getPageTitle()}</h2>
-                <p className="text-sm text-text-secondary mt-1">
+                <h2 className="text-foreground">{getPageTitle()}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   {getBreadcrumb()}
                 </p>
               </div>
@@ -1339,6 +1375,22 @@ export default function App() {
                 {viewMode === "team" && activeNav === "tasks" && (
                   <NewRequestModal />
                 )}
+                
+                {/* Theme Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  className="text-muted-foreground hover:text-foreground hover:bg-cyan-accent/10 transition-colors"
+                  title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+                
                 {viewMode !== "client" && (
                   <Button
                     variant="ghost"
@@ -1347,7 +1399,7 @@ export default function App() {
                       setActiveNav("notifications");
                       setActivePage("main");
                     }}
-                    className="text-text-secondary hover:text-white hover:bg-cyan-accent/10"
+                    className="text-muted-foreground hover:text-foreground hover:bg-cyan-accent/10"
                     title="View notifications"
                   >
                     <Bell className="h-5 w-5" />
@@ -1359,7 +1411,7 @@ export default function App() {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto bg-dark-bg">
+        <main className="flex-1 overflow-y-auto bg-background">
           <div className="p-8">{renderMainContent()}</div>
         </main>
       </div>

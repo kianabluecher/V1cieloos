@@ -123,7 +123,7 @@ export function AnalyticsPage() {
       <Card className="border-border-subtle p-8">
         <div className="text-center">
           <Activity className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-white mb-2">Failed to Load Analytics</h3>
+          <h3 className="text-foreground mb-2">Failed to Load Analytics</h3>
           <p className="text-text-secondary mb-4">{error}</p>
           <Button 
             onClick={fetchAnalytics}
@@ -144,13 +144,13 @@ export function AnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-white mb-1">Web Analytics</h1>
+          <h1 className="text-2xl text-foreground mb-1">Web Analytics</h1>
           <p className="text-text-secondary">Real-time website performance insights powered by TWIPLA</p>
         </div>
         <Button 
           onClick={fetchAnalytics}
           variant="outline"
-          className="border-border-subtle text-white hover:bg-cyan-accent/10"
+          className="border-border-subtle text-foreground hover:bg-cyan-accent/10"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
@@ -159,7 +159,7 @@ export function AnalyticsPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
+        <Card className="border-border-subtle bg-card p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-cyan-accent" />
@@ -171,13 +171,13 @@ export function AnalyticsPage() {
               <TrendingDown className="h-4 w-4 text-red-400" />
             )}
           </div>
-          <div className="text-3xl text-white mb-1">{data.summary.totalVisitors.toLocaleString()}</div>
+          <div className="text-3xl text-foreground mb-1">{data.summary.totalVisitors.toLocaleString()}</div>
           <div className={`text-sm ${data.summary.visitorsTrend > 0 ? 'text-green-400' : 'text-red-400'}`}>
             {data.summary.visitorsTrend > 0 ? '+' : ''}{data.summary.visitorsTrend}% vs last period
           </div>
         </Card>
 
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
+        <Card className="border-border-subtle bg-card p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-cyan-accent" />
@@ -189,13 +189,13 @@ export function AnalyticsPage() {
               <TrendingDown className="h-4 w-4 text-red-400" />
             )}
           </div>
-          <div className="text-3xl text-white mb-1">{data.summary.pageViews.toLocaleString()}</div>
+          <div className="text-3xl text-foreground mb-1">{data.summary.pageViews.toLocaleString()}</div>
           <div className={`text-sm ${data.summary.pageViewsTrend > 0 ? 'text-green-400' : 'text-red-400'}`}>
             {data.summary.pageViewsTrend > 0 ? '+' : ''}{data.summary.pageViewsTrend}% vs last period
           </div>
         </Card>
 
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
+        <Card className="border-border-subtle bg-card p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-cyan-accent" />
@@ -207,13 +207,13 @@ export function AnalyticsPage() {
               <TrendingDown className="h-4 w-4 text-red-400" />
             )}
           </div>
-          <div className="text-3xl text-white mb-1">{data.summary.avgSessionDuration}</div>
+          <div className="text-3xl text-foreground mb-1">{data.summary.avgSessionDuration}</div>
           <div className={`text-sm ${data.summary.sessionTrend > 0 ? 'text-green-400' : 'text-red-400'}`}>
             {data.summary.sessionTrend > 0 ? '+' : ''}{data.summary.sessionTrend}% vs last period
           </div>
         </Card>
 
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
+        <Card className="border-border-subtle bg-card p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <MousePointerClick className="h-5 w-5 text-cyan-accent" />
@@ -225,7 +225,7 @@ export function AnalyticsPage() {
               <TrendingDown className="h-4 w-4 text-red-400" />
             )}
           </div>
-          <div className="text-3xl text-white mb-1">{data.summary.bounceRate}%</div>
+          <div className="text-3xl text-foreground mb-1">{data.summary.bounceRate}%</div>
           <div className={`text-sm ${data.summary.bounceTrend < 0 ? 'text-green-400' : 'text-red-400'}`}>
             {data.summary.bounceTrend > 0 ? '+' : ''}{data.summary.bounceTrend}% vs last period
           </div>
@@ -235,8 +235,8 @@ export function AnalyticsPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Traffic Chart */}
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
-          <h3 className="text-white mb-4">Weekly Traffic Overview</h3>
+        <Card className="border-border-subtle bg-card p-6">
+          <h3 className="text-foreground mb-4">Weekly Traffic Overview</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data.weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
@@ -266,8 +266,8 @@ export function AnalyticsPage() {
         </Card>
 
         {/* Traffic Sources */}
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
-          <h3 className="text-white mb-4">Traffic Sources</h3>
+        <Card className="border-border-subtle bg-card p-6">
+          <h3 className="text-foreground mb-4">Traffic Sources</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -295,8 +295,8 @@ export function AnalyticsPage() {
       {/* Device Breakdown & Top Pages */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Device Breakdown */}
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
-          <h3 className="text-white mb-4">Device Breakdown</h3>
+        <Card className="border-border-subtle bg-card p-6">
+          <h3 className="text-foreground mb-4">Device Breakdown</h3>
           <div className="space-y-4">
             {data.deviceBreakdown.map((device: any, index: number) => (
               <div key={device.name}>
@@ -305,11 +305,11 @@ export function AnalyticsPage() {
                     {device.name === 'Desktop' && <Monitor className="h-4 w-4 text-cyan-accent" />}
                     {device.name === 'Mobile' && <Smartphone className="h-4 w-4 text-cyan-accent" />}
                     {device.name === 'Tablet' && <Globe className="h-4 w-4 text-cyan-accent" />}
-                    <span className="text-white">{device.name}</span>
+                    <span className="text-foreground">{device.name}</span>
                   </div>
                   <span className="text-text-secondary">{device.value.toLocaleString()} ({device.percentage}%)</span>
                 </div>
-                <div className="w-full bg-dark-bg rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div 
                     className="h-2 rounded-full" 
                     style={{ 
@@ -324,22 +324,22 @@ export function AnalyticsPage() {
         </Card>
 
         {/* Top Pages */}
-        <Card className="border-border-subtle p-6" style={{ backgroundColor: '#1A1A1A' }}>
-          <h3 className="text-white mb-4">Top Pages</h3>
+        <Card className="border-border-subtle bg-card p-6">
+          <h3 className="text-foreground mb-4">Top Pages</h3>
           <div className="space-y-3">
             {data.topPages.map((page: any, index: number) => (
-              <div key={page.path} className="flex items-center justify-between p-3 bg-dark-bg rounded-lg border border-border-subtle">
+              <div key={page.path} className="flex items-center justify-between p-3 bg-muted rounded-lg border border-border">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="outline" className="bg-cyan-accent/10 text-cyan-accent border-cyan-accent/20 text-xs">
                       #{index + 1}
                     </Badge>
-                    <span className="text-white">{page.path}</span>
+                    <span className="text-foreground">{page.path}</span>
                   </div>
                   <div className="text-xs text-text-secondary">Avg. Time: {page.avgTime}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-white">{page.views.toLocaleString()}</div>
+                  <div className="text-foreground">{page.views.toLocaleString()}</div>
                   <div className="text-xs text-text-secondary">views</div>
                 </div>
               </div>
@@ -353,7 +353,7 @@ export function AnalyticsPage() {
         <div className="flex items-start gap-3">
           <BarChart3 className="h-5 w-5 text-cyan-accent flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-white mb-1">Powered by TWIPLA</h4>
+            <h4 className="text-foreground mb-1">Powered by TWIPLA</h4>
             <p className="text-sm text-text-secondary">
               Analytics data is sourced from TWIPLA (Visitor Analytics). Data updates in real-time and provides comprehensive insights into your website performance.
             </p>

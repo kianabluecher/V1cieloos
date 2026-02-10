@@ -275,7 +275,7 @@ export function DesignRequestsPage() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-4">
           {icon}
-          <h3 className="text-sm text-white">{title}</h3>
+          <h3 className="text-sm text-foreground">{title}</h3>
           <Badge variant="secondary" className="text-xs bg-cyan-accent/10 text-cyan-accent border-cyan-accent/20">
             {count}
           </Badge>
@@ -295,7 +295,7 @@ export function DesignRequestsPage() {
 
           {isEmpty && status !== 'queued' && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-12 h-12 bg-card-bg rounded-lg flex items-center justify-center mb-3">
+              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-3">
                 <Layers className="h-6 w-6 text-text-secondary" />
               </div>
               <p className="text-sm text-text-secondary">
@@ -307,10 +307,10 @@ export function DesignRequestsPage() {
           {columnTasks.map((task) => (
             <Card 
               key={task.id} 
-              className={`p-3 transition-all duration-200 group border-border-subtle bg-card-bg ${
+              className={`p-3 transition-all duration-200 group border-border-subtle bg-card ${
                 task.status === 'running' || task.status === 'waiting' || task.status === 'completed'
                   ? 'hover:bg-cyan-accent/5 cursor-pointer hover:border-cyan-accent/30'
-                  : 'hover:bg-card-bg/80'
+                  : 'hover:bg-muted/50'
               }`}
               onClick={() => handleTaskClick(task)}
             >
@@ -345,7 +345,7 @@ export function DesignRequestsPage() {
                         'bg-text-secondary'
                       }`} />
                     </div>
-                    <h4 className="text-sm leading-tight group-hover:text-cyan-accent transition-colors text-white">
+                    <h4 className="text-sm leading-tight group-hover:text-cyan-accent transition-colors text-foreground">
                       {task.title}
                     </h4>
                   </div>
@@ -427,7 +427,7 @@ export function DesignRequestsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-cyan-accent" />
-        <span className="ml-2 text-white">Loading tasks...</span>
+        <span className="ml-2 text-foreground">Loading tasks...</span>
       </div>
     );
   }
@@ -438,7 +438,7 @@ export function DesignRequestsPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-white">Design Requests</h3>
+            <h3 className="text-foreground">Design Requests</h3>
             <Badge variant="secondary" className="bg-cyan-accent/10 text-cyan-accent border-cyan-accent/20">
               Beta
             </Badge>
@@ -448,16 +448,17 @@ export function DesignRequestsPage() {
         <SimpleTaskModal onSubmit={handleNewTask} />
       </div>
 
-      {/* Search and Filters */}\n      <div className="flex items-center gap-4">
+      {/* Search and Filters */}
+      <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-text-secondary" />
-          <Input placeholder="Search requests..." className="pl-9 bg-card-bg border-border-subtle text-white" />
+          <Input placeholder="Search requests..." className="pl-9 bg-card border-border-subtle text-foreground" />
         </div>
-        <Button variant="outline" className="border-border-subtle text-white hover:bg-cyan-accent/10 hover:text-cyan-accent">
+        <Button variant="outline" className="border-border-subtle text-foreground hover:bg-cyan-accent/10 hover:text-cyan-accent">
           <Filter className="h-4 w-4 mr-2" />
           Filter
         </Button>
-        <Button variant="outline" className="border-border-subtle text-white hover:bg-cyan-accent/10 hover:text-cyan-accent">
+        <Button variant="outline" className="border-border-subtle text-foreground hover:bg-cyan-accent/10 hover:text-cyan-accent">
           <ArrowUpDown className="h-4 w-4 mr-2" />
           Sort
         </Button>

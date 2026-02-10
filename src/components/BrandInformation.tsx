@@ -74,81 +74,78 @@ export function BrandInformation() {
 
   if (isLoading) {
     return (
-      <Card className="p-6 glass backdrop-blur-heavy border-white/20 shadow-2xl bg-white/10">
+      <Card className="p-6 bg-card border-border">
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-cyan-accent" />
-          <span className="ml-2 text-white/90">Loading brand information...</span>
+          <span className="ml-2 text-foreground">Loading brand information...</span>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="p-6 glass backdrop-blur-heavy border-white/20 shadow-2xl bg-white/10">
+    <Card className="p-6 bg-card border-border">
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="company-name" className="text-white/90">Company Name</Label>
+            <Label htmlFor="company-name">Company Name</Label>
             <Input
               id="company-name"
               placeholder="Enter company name"
               value={brandData.companyName}
               onChange={(e) => handleInputChange('companyName', e.target.value)}
-              className="bg-white/10 border-white/20 focus:border-white/40 focus:bg-white/15 transition-all duration-300 text-white placeholder:text-white/60 backdrop-blur-light"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="industry" className="text-white/90">Industry</Label>
+            <Label htmlFor="industry">Industry</Label>
             <Input
               id="industry"
               placeholder="e.g., Technology, Healthcare"
               value={brandData.industry}
               onChange={(e) => handleInputChange('industry', e.target.value)}
-              className="bg-white/10 border-white/20 focus:border-white/40 focus:bg-white/15 transition-all duration-300 text-white placeholder:text-white/60 backdrop-blur-light"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="target-audience" className="text-white/90">Target Audience</Label>
+          <Label htmlFor="target-audience">Target Audience</Label>
           <Input
             id="target-audience"
             placeholder="Describe your target audience"
             value={brandData.targetAudience}
             onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-            className="bg-white/10 border-white/20 focus:border-white/40 focus:bg-white/15 transition-all duration-300 text-white placeholder:text-white/60 backdrop-blur-light"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="brand-personality" className="text-white/90">Brand Personality &amp; Goals</Label>
+          <Label htmlFor="brand-personality">Brand Personality &amp; Goals</Label>
           <Textarea
             id="brand-personality"
             placeholder="Describe your brand's personality and key goals"
             value={brandData.brandPersonality}
             onChange={(e) => handleInputChange('brandPersonality', e.target.value)}
             rows={3}
-            className="bg-white/10 border-white/20 focus:border-white/40 focus:bg-white/15 transition-all duration-300 text-white placeholder:text-white/60 backdrop-blur-light resize-none"
+            className="resize-none"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="challenges" className="text-white/90">Current Challenges</Label>
+          <Label htmlFor="challenges">Current Challenges</Label>
           <Textarea
             id="challenges"
             placeholder="What challenges is your brand currently facing?"
             value={brandData.challenges}
             onChange={(e) => handleInputChange('challenges', e.target.value)}
             rows={3}
-            className="bg-white/10 border-white/20 focus:border-white/40 focus:bg-white/15 transition-all duration-300 text-white placeholder:text-white/60 backdrop-blur-light resize-none"
+            className="resize-none"
           />
         </div>
 
         <Button 
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full md:w-auto bg-cyan-accent hover:bg-cyan-accent/90 text-dark-bg glow-cyan transition-all duration-300 shadow-lg nav-item-glow"
+          className="w-full md:w-auto bg-cyan-accent hover:bg-cyan-accent/90 text-primary-foreground transition-all duration-300"
         >
           {isSaving ? (
             <>

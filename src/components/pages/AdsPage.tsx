@@ -95,7 +95,7 @@ export function AdsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-white">Advertising Campaign Manager</h3>
+          <h3 className="text-foreground">Advertising Campaign Manager</h3>
           <p className="text-text-secondary mt-1">Track and optimize your paid advertising campaigns</p>
         </div>
         <Button className="bg-cyan-accent hover:bg-cyan-accent/80 text-dark-bg">
@@ -112,7 +112,7 @@ export function AdsPage() {
               <DollarSign className="h-5 w-5 text-cyan-accent" />
             </div>
             <div>
-              <p className="text-2xl text-white">${formatNumber(totalSpend)}</p>
+              <p className="text-2xl text-foreground">${formatNumber(totalSpend)}</p>
               <p className="text-text-secondary text-sm">Total Spend</p>
             </div>
           </div>
@@ -124,7 +124,7 @@ export function AdsPage() {
               <Eye className="h-5 w-5 text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl text-white">{formatNumber(totalImpressions)}</p>
+              <p className="text-2xl text-foreground">{formatNumber(totalImpressions)}</p>
               <p className="text-text-secondary text-sm">Impressions</p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export function AdsPage() {
               <MousePointerClick className="h-5 w-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-2xl text-white">{formatNumber(totalClicks)}</p>
+              <p className="text-2xl text-foreground">{formatNumber(totalClicks)}</p>
               <p className="text-text-secondary text-sm">Clicks</p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export function AdsPage() {
               <TrendingUp className="h-5 w-5 text-green-400" />
             </div>
             <div>
-              <p className="text-2xl text-white">{totalConversions}</p>
+              <p className="text-2xl text-foreground">{totalConversions}</p>
               <p className="text-text-secondary text-sm">Conversions</p>
             </div>
           </div>
@@ -159,7 +159,7 @@ export function AdsPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-white">Active Campaigns</h4>
+            <h4 className="text-foreground">Active Campaigns</h4>
             <p className="text-text-secondary text-sm">Live advertising campaigns with real-time metrics</p>
           </div>
           <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20">
@@ -187,7 +187,7 @@ export function AdsPage() {
               {/* Campaign Info */}
               <div className="p-5 space-y-4">
                 <div>
-                  <h5 className="text-white mb-1">{campaign.name}</h5>
+                  <h5 className="text-foreground mb-1">{campaign.name}</h5>
                   <Badge variant="outline" className="bg-border-subtle/20 text-text-secondary text-xs">
                     {campaign.platform}
                   </Badge>
@@ -200,14 +200,14 @@ export function AdsPage() {
                       <Eye className="h-3 w-3 text-blue-400" />
                       <p className="text-text-secondary text-xs">Impressions</p>
                     </div>
-                    <p className="text-white">{formatNumber(campaign.metrics.impressions)}</p>
+                    <p className="text-foreground">{formatNumber(campaign.metrics.impressions)}</p>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <MousePointerClick className="h-3 w-3 text-purple-400" />
                       <p className="text-text-secondary text-xs">Clicks</p>
                     </div>
-                    <p className="text-white">{formatNumber(campaign.metrics.clicks)}</p>
+                    <p className="text-foreground">{formatNumber(campaign.metrics.clicks)}</p>
                   </div>
                 </div>
 
@@ -218,14 +218,14 @@ export function AdsPage() {
                       <Users className="h-3 w-3 text-green-400" />
                       <p className="text-text-secondary text-xs">Conversions</p>
                     </div>
-                    <p className="text-white">{campaign.metrics.conversions}</p>
+                    <p className="text-foreground">{campaign.metrics.conversions}</p>
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <DollarSign className="h-3 w-3 text-cyan-accent" />
                       <p className="text-text-secondary text-xs">Spend</p>
                     </div>
-                    <p className="text-white">${formatNumber(campaign.metrics.spend)}</p>
+                    <p className="text-foreground">${formatNumber(campaign.metrics.spend)}</p>
                   </div>
                 </div>
 
@@ -234,17 +234,17 @@ export function AdsPage() {
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">CTR:</span>
-                      <span className="text-white">{campaign.metrics.ctr}%</span>
+                      <span className="text-foreground">{campaign.metrics.ctr}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">CPC:</span>
-                      <span className="text-white">${campaign.metrics.cpc}</span>
+                      <span className="text-foreground">${campaign.metrics.cpc}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">CPA:</span>
-                      <span className="text-white">${campaign.metrics.cpa}</span>
+                      <span className="text-foreground">${campaign.metrics.cpa}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">ROAS:</span>
@@ -257,14 +257,14 @@ export function AdsPage() {
                 <div className="flex gap-2 pt-2">
                   <Button 
                     variant="outline" 
-                    className="flex-1 border-border-subtle text-white hover:bg-card-bg text-xs h-8"
+                    className="flex-1 border-border-subtle text-foreground hover:bg-card-bg text-xs h-8"
                   >
                     <Activity className="h-3 w-3 mr-1" />
                     Analytics
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="flex-1 border-border-subtle text-white hover:bg-card-bg text-xs h-8"
+                    className="flex-1 border-border-subtle text-foreground hover:bg-card-bg text-xs h-8"
                   >
                     <BarChart3 className="h-3 w-3 mr-1" />
                     Edit
@@ -284,22 +284,22 @@ export function AdsPage() {
               <Activity className="h-5 w-5 text-cyan-accent" />
             </div>
             <div>
-              <h4 className="text-white">Average Performance</h4>
+              <h4 className="text-foreground">Average Performance</h4>
               <p className="text-text-secondary text-sm">Across all campaigns</p>
             </div>
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-text-secondary text-sm">Average CTR</span>
-              <span className="text-white">{avgCTR}%</span>
+              <span className="text-foreground">{avgCTR}%</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary text-sm">Average CPC</span>
-              <span className="text-white">${avgCPC}</span>
+              <span className="text-foreground">${avgCPC}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary text-sm">Total Campaigns</span>
-              <span className="text-white">{adCampaigns.length}</span>
+              <span className="text-foreground">{adCampaigns.length}</span>
             </div>
           </div>
         </Card>
@@ -310,14 +310,14 @@ export function AdsPage() {
               <TrendingUp className="h-5 w-5 text-green-400" />
             </div>
             <div>
-              <h4 className="text-white">Top Performer</h4>
+              <h4 className="text-foreground">Top Performer</h4>
               <p className="text-text-secondary text-sm">Best ROAS this month</p>
             </div>
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-text-secondary text-sm">Campaign</span>
-              <span className="text-white">{adCampaigns[0].name}</span>
+              <span className="text-foreground">{adCampaigns[0].name}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary text-sm">ROAS</span>
@@ -325,7 +325,7 @@ export function AdsPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary text-sm">Conversions</span>
-              <span className="text-white">{adCampaigns[0].metrics.conversions}</span>
+              <span className="text-foreground">{adCampaigns[0].metrics.conversions}</span>
             </div>
           </div>
         </Card>

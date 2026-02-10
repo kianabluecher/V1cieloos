@@ -264,7 +264,7 @@ export function CRMPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-white">CRM Dashboard</h3>
+          <h3 className="text-foreground">CRM Dashboard</h3>
           <p className="text-sm text-text-secondary mt-1">
             Live data from Google Sheets
             {crmData?.lastSync && (
@@ -279,7 +279,7 @@ export function CRMPage() {
             variant="outline" 
             onClick={exportToCSV}
             disabled={!crmData || crmData.data.length === 0}
-            className="border-border-subtle text-white hover:bg-cyan-accent/10 hover:text-cyan-accent"
+            className="border-border-subtle text-foreground hover:bg-cyan-accent/10 hover:text-cyan-accent"
           >
             <Download className="h-4 w-4 mr-2" />
             Export CSV
@@ -297,11 +297,11 @@ export function CRMPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-6 bg-card-bg border-border-subtle">
+        <Card className="p-6 bg-card border-border-subtle">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-text-secondary">Total Records</p>
-              <p className="text-2xl text-white mt-1">{stats.total}</p>
+              <p className="text-2xl text-foreground mt-1">{stats.total}</p>
             </div>
             <div className="w-12 h-12 rounded-lg bg-cyan-accent/10 flex items-center justify-center">
               <Users className="h-6 w-6 text-cyan-accent" />
@@ -309,11 +309,11 @@ export function CRMPage() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-card-bg border-border-subtle">
+        <Card className="p-6 bg-card border-border-subtle">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-text-secondary">Active</p>
-              <p className="text-2xl text-white mt-1">{stats.active}</p>
+              <p className="text-2xl text-foreground mt-1">{stats.active}</p>
             </div>
             <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
               <CheckCircle className="h-6 w-6 text-green-500" />
@@ -321,11 +321,11 @@ export function CRMPage() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-card-bg border-border-subtle">
+        <Card className="p-6 bg-card border-border-subtle">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-text-secondary">Total Value</p>
-              <p className="text-2xl text-white mt-1">
+              <p className="text-2xl text-foreground mt-1">
                 ${stats.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
@@ -342,14 +342,14 @@ export function CRMPage() {
           <Search className="absolute left-3 top-3 h-4 w-4 text-text-secondary" />
           <Input 
             placeholder="Search all fields..." 
-            className="pl-9 bg-card-bg border-border-subtle text-white"
+            className="pl-9 bg-card border-border-subtle text-foreground"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button 
           variant="outline" 
-          className="border-border-subtle text-white hover:bg-cyan-accent/10 hover:text-cyan-accent"
+          className="border-border-subtle text-foreground hover:bg-cyan-accent/10 hover:text-cyan-accent"
         >
           <Filter className="h-4 w-4 mr-2" />
           Filter
@@ -358,9 +358,9 @@ export function CRMPage() {
 
       {/* Data Table */}
       {!crmData || crmData.data.length === 0 ? (
-        <Card className="p-12 bg-card-bg border-border-subtle text-center">
+        <Card className="p-12 bg-card border-border-subtle text-center">
           <AlertCircle className="h-12 w-12 text-text-secondary mx-auto mb-4" />
-          <h3 className="text-white mb-2">No Data Available</h3>
+          <h3 className="text-foreground mb-2">No Data Available</h3>
           <p className="text-text-secondary mb-4">
             Click "Sync Now" to load data from Google Sheets
           </p>
@@ -374,7 +374,7 @@ export function CRMPage() {
           </Button>
         </Card>
       ) : (
-        <Card className="bg-card-bg border-border-subtle overflow-hidden">
+        <Card className="bg-card border-border-subtle overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-dark-bg border-b border-border-subtle">

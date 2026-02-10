@@ -437,14 +437,14 @@ export function BillingPage({ submenu }: BillingPageProps = {}) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl text-white mb-1">Packages</h2>
-          <p className="text-gray-400">Configure service packages and pricing tiers</p>
+          <h2 className="text-2xl text-foreground mb-1">Packages</h2>
+          <p className="text-text-secondary">Configure service packages and pricing tiers</p>
         </div>
         <Card className="glass-card border-border-subtle p-8">
           <div className="text-center py-12">
             <Users className="h-16 w-16 text-cyan-accent mx-auto mb-4 opacity-50" />
-            <p className="text-white mb-2">Package management coming soon</p>
-            <p className="text-gray-400 text-sm">Create and customize service packages for different client needs</p>
+            <p className="text-foreground mb-2">Package management coming soon</p>
+            <p className="text-text-secondary text-sm">Create and customize service packages for different client needs</p>
           </div>
         </Card>
       </div>
@@ -455,7 +455,7 @@ export function BillingPage({ submenu }: BillingPageProps = {}) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl text-white mb-1">Billing & Subscriptions</h2>
+        <h2 className="text-2xl text-foreground mb-1">Billing & Subscriptions</h2>
         <p className="text-text-secondary">
           Manage client subscription plans and billing information
         </p>

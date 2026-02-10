@@ -26,6 +26,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { api } from "../../utils/supabase/client";
 import { toast } from "sonner@2.0.3";
+import { ThemeAwareTooltip } from "../ThemeAwareTooltip";
 
 const strategySessions = [
   {
@@ -328,14 +329,7 @@ export function StrategyPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
                   <XAxis dataKey="month" stroke="#888888" />
                   <YAxis stroke="#888888" domain={[50, 100]} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#111111', 
-                      border: '1px solid #333333',
-                      borderRadius: '8px',
-                      color: '#ffffff'
-                    }} 
-                  />
+                  <Tooltip content={<ThemeAwareTooltip />} />
                   <Line 
                     type="monotone" 
                     dataKey="marketPosition" 
@@ -382,14 +376,7 @@ export function StrategyPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
                   <XAxis dataKey="week" stroke="#888888" />
                   <YAxis stroke="#888888" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#111111', 
-                      border: '1px solid #333333',
-                      borderRadius: '8px',
-                      color: '#ffffff'
-                    }} 
-                  />
+                  <Tooltip content={<ThemeAwareTooltip />} />
                   <Line 
                     type="monotone" 
                     dataKey="brandAwareness" 
