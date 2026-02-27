@@ -1079,27 +1079,70 @@ export const api = {
     }
   },
 
-  getRecordingNotes: async (recordingId: string) => {
+  // ============================================
+  // CLIENT LINKS MANAGEMENT
+  // ============================================
+
+  // Get client links
+  getClientLinks: async (clientId: string) => {
     try {
-      const response = await fetch(`${BASE_URL}/recordings/${recordingId}/notes`, {
+      const response = await fetch(`${BASE_URL}/clients/${clientId}/links`, {
         headers: { 'Authorization': `Bearer ${publicAnonKey}` }
       });
-      return response.json();
+      const result = await response.json();
+      return result.success ? result.data : [];
     } catch (error) {
-      console.error('Error fetching recording notes:', error);
-      return { success: false, error: error.message, data: [] };
+      console.error('Error fetching client links:', error);
+      return [];
     }
   },
 
-  deleteRecordingNote: async (noteId: string) => {
+  // Add client link
+  addClientLink: async (linkData: any) => {
     try {
-      const response = await fetch(`${BASE_URL}/recordings/notes/${noteId}`, {
+      const response = await fetch(`${BASE_URL}/clients/${linkData.clientId}/links`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify(linkData)
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Error adding client link:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Update client link
+  updateClientLink: async (linkId: string, updates: any) => {
+    try {
+      const response = await fetch(`${BASE_URL}/links/${linkId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`
+        },
+        body: JSON.stringify(updates)
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Error updating client link:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Delete client link
+  deleteClientLink: async (linkId: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/links/${linkId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${publicAnonKey}` }
       });
       return response.json();
     } catch (error) {
-      console.error('Error deleting recording note:', error);
+      console.error('Error deleting client link:', error);
       return { success: false, error: error.message };
     }
   },
@@ -1161,23 +1204,6 @@ export const api = {
       return response.json();
     } catch (error) {
       console.error('Error uploading client file:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  addClientLink: async (clientId: string, url: string, name: string, channelId?: string, uploadedBy?: string) => {
-    try {
-      const response = await fetch(`${BASE_URL}/clients/${clientId}/links`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`
-        },
-        body: JSON.stringify({ url, name, channelId, uploadedBy })
-      });
-      return response.json();
-    } catch (error) {
-      console.error('Error adding client link:', error);
       return { success: false, error: error.message };
     }
   },

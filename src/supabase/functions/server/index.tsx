@@ -2238,6 +2238,123 @@ app.get("/make-server-c3abf285/clients/:clientId/activity", async (c) => {
   }
 });
 
+// ============================================
+// CLIENT LINKS ENDPOINTS
+// ============================================
+
+// Get all links for a client
+app.get("/make-server-c3abf285/clients/:clientId/links", async (c) => {
+  try {
+    const clientId = c.req.param('clientId');
+    const allLinks = await kv.get(`client_links:${clientId}`) || [];
+    
+    return c.json({ success: true, data: allLinks });
+  } catch (error) {
+    console.error('Error fetching client links:', error);
+    return c.json({ success: false, error: 'Failed to fetch links' }, 500);
+  }
+});
+
+// Add a new link for a client
+app.post("/make-server-c3abf285/clients/:clientId/links", async (c) => {
+  try {
+    const clientId = c.req.param('clientId');
+    const body = await c.req.json();
+    
+    const allLinks = await kv.get(`client_links:${clientId}`) || [];
+    
+    const newLink = {
+      id: `link-${Date.now()}`,
+      clientId,
+      type: body.type || 'custom',
+      label: body.label,
+      url: body.url,
+      isPublic: body.isPublic !== undefined ? body.isPublic : true,
+      createdAt: new Date().toISOString()
+    };
+    
+    allLinks.push(newLink);
+    await kv.set(`client_links:${clientId}`, allLinks);
+    
+    return c.json({ 
+      success: true, 
+      data: newLink,
+      message: 'Link added successfully' 
+    });
+  } catch (error) {
+    console.error('Error adding client link:', error);
+    return c.json({ success: false, error: 'Failed to add link' }, 500);
+  }
+});
+
+// Update a link
+app.put("/make-server-c3abf285/links/:linkId", async (c) => {
+  try {
+    const linkId = c.req.param('linkId');
+    const body = await c.req.json();
+    
+    // Find the link across all clients
+    const clientIds = await kv.getByPrefix('client_links:') || [];
+    
+    for (const { key, value } of clientIds) {
+      const links = value as any[];
+      const linkIndex = links.findIndex((link: any) => link.id === linkId);
+      
+      if (linkIndex !== -1) {
+        // Update the link
+        links[linkIndex] = {
+          ...links[linkIndex],
+          ...body,
+          updatedAt: new Date().toISOString()
+        };
+        
+        await kv.set(key, links);
+        
+        return c.json({ 
+          success: true, 
+          data: links[linkIndex],
+          message: 'Link updated successfully' 
+        });
+      }
+    }
+    
+    return c.json({ success: false, error: 'Link not found' }, 404);
+  } catch (error) {
+    console.error('Error updating link:', error);
+    return c.json({ success: false, error: 'Failed to update link' }, 500);
+  }
+});
+
+// Delete a link
+app.delete("/make-server-c3abf285/links/:linkId", async (c) => {
+  try {
+    const linkId = c.req.param('linkId');
+    
+    // Find and delete the link across all clients
+    const clientIds = await kv.getByPrefix('client_links:') || [];
+    
+    for (const { key, value } of clientIds) {
+      const links = value as any[];
+      const linkIndex = links.findIndex((link: any) => link.id === linkId);
+      
+      if (linkIndex !== -1) {
+        links.splice(linkIndex, 1);
+        await kv.set(key, links);
+        
+        return c.json({ 
+          success: true, 
+          message: 'Link deleted successfully' 
+        });
+      }
+    }
+    
+    return c.json({ success: false, error: 'Link not found' }, 404);
+  } catch (error) {
+    console.error('Error deleting link:', error);
+    return c.json({ success: false, error: 'Failed to delete link' }, 500);
+  }
+});
+
 // Create Recording
 app.post("/make-server-c3abf285/recordings", async (c) => {
   try {
